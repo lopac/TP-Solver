@@ -1,25 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using TP_Solver.Helpers;
 
 namespace TP_Solver.Models
 {
-    public struct CellState
-    {
-        public const double NotAllocated = -1;
-        public const double Allocated = 0;
-    }
-
-    public sealed class Cell
-    {
-        public Cell()
-        {
-            Allocated = CellState.NotAllocated;
-        }
-
-        public double Value { get; set; }
-        public double Allocated { get; set; }
-    }
-
-
     public class Matrix
     {
         private readonly Cell[,] _array;
@@ -114,6 +98,69 @@ namespace TP_Solver.Models
 
                 AllocateRow(row, column);
                 AllocateColumn(row, column);
+            }
+        }
+
+        public Matrix GetCopy()
+        {
+            var rows = this.GetLength(0);
+            var cols = this.GetLength(1);
+
+            var matrix = new Matrix(rows, cols)
+            {
+            };
+
+            for (var i = 0; i < this.Demands.Length; i++)
+            {
+                matrix.Demands[i] = this.Demands[i];
+            }
+
+            for (var i = 0; i < this.Supplies.Length; i++)
+            {
+                matrix.Supplies[i] = this.Supplies[i];
+            }
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    matrix[i, j] = new Cell
+                    {
+                        Value = this[i, j].Value,
+                        Allocated = this[i, j].Allocated
+                    };
+                }
+            }
+
+            return matrix;
+        }
+
+        public string ResultFunction
+        {
+            get
+            {
+                double result = 0;
+                var resultFunction = string.Empty;
+                for (int i = 0; i < this.GetLength(0); i++)
+                {
+                    for (int j = 0; j < this.GetLength(1); j++)
+                    {
+                        if (this[i, j].Allocated > 0)
+                        {
+                            resultFunction += $"({this[i, j].Allocated} * {this[i, j].Value})";
+                            resultFunction += $" + ";
+
+                            result += this[i, j].Allocated * this[i, j].Value;
+                        }
+                    }
+                }
+
+
+                resultFunction = resultFunction.ReplaceLastOccurrence(" + ", String.Empty);
+
+                resultFunction += $" = {result}";
+
+                return resultFunction;
             }
         }
     }

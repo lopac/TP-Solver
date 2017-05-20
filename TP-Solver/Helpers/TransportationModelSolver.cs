@@ -21,7 +21,7 @@ namespace TP_Solver.Helpers
                         if (matrix[row, column].Allocated is CellState.NotAllocated)
                         {
                             matrix.Allocate(row, column);
-                            solutionMatrices.Add(matrix);
+                            solutionMatrices.Add(matrix.GetCopy());
                         }
                     }
                 }

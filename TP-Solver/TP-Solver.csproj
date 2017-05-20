@@ -115,6 +115,7 @@
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\Images\logo.png" />
     <Content Include="Content\Site.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -123,6 +124,10 @@
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="package.json" />
+    <TypeScriptCompile Include="Scripts\app\Cell.ts" />
+    <TypeScriptCompile Include="Scripts\app\MatrixService.ts" />
+    <Content Include="Scripts\systemjs-angular-loader.js" />
+    <Content Include="Scripts\systemjs.config.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-3.1.1.intellisense.js" />
@@ -140,10 +145,14 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\WebAPI\SolveController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Helpers\TransportationModelSolver.cs" />
+    <Compile Include="Models\Cell.cs" />
+    <Compile Include="Models\CellState.cs" />
     <Compile Include="Models\Matrix.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -161,9 +170,16 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Scripts\app\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\app\app.component.ts" />
+    <TypeScriptCompile Include="Scripts\app\app.module.ts" />
+    <TypeScriptCompile Include="Scripts\app\Cell.component.ts" />
+    <TypeScriptCompile Include="Scripts\app\Container.component.ts" />
+    <TypeScriptCompile Include="Scripts\app\Matrix.component.ts" />
+    <TypeScriptCompile Include="Scripts\app\Matrix.ts" />
+    <TypeScriptCompile Include="Scripts\app\ResultMatrix.ts" />
+    <TypeScriptCompile Include="Scripts\main.ts" />
     <TypeScriptCompile Include="Scripts\typings\angularjs\angular-animate.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\angularjs\angular-component-router.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\angularjs\angular-cookies.d.ts" />
