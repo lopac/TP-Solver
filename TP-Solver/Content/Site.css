@@ -5,7 +5,6 @@
 .brand-text {
     display: block;
     font-size: 25px;
-    color: #666 !important;
 }
 
 .clear {
@@ -20,7 +19,6 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
     display: table;
     margin: 0 auto;
 }
-
 
 
 /*matrix {
@@ -47,18 +45,37 @@ container button {
 matrix {
     display: table;
     margin: 20px auto;
-    background: white;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 1.2px 1.2px 10px 1.2px rgba(0,0,0,.1);
+}
+
+matrix > button.btn {
+    font-size: 20px;
+    margin-top: 10px;
+}
+
+
+matrix > p {
+    text-align: center;
+    font-size: 20px;
+    /*font-weight: bold;*/
+    margin-top: 20px;
+    color: #666;
+}
+
+matrix > p.title {
+    font-size: 25px;
+    font-weight: bold;
 }
 
 .matrix {
+    display: table;
+    margin: 20px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 1.2px 1.2px 10px 1.2px rgba(0, 0, 0, .1);
 }
 
-cell > div.form-group {
-    float: left !important;
-}
+cell > div.form-group { float: left !important; }
 
 .matrix .column {
     float: left;
@@ -74,21 +91,23 @@ cell > div.form-group {
 .column:nth-child(1) :last-child { margin-bottom: 11px !important; }
 
 
-cell.form-group {
-    max-width: 95% !important;
-}
+cell.form-group { max-width: 95% !important; }
 
-cell input {
-    max-width: 95% !important;
-}
+cell input { max-width: 95% !important; }
 
 
 cell.finalRow input, cell.finalColumn input {
-    background: #777;
-    color: white;
+    background: #777 !important;
+    color: white !important;
 }
 
 
 cell.finalRow.finalColumn input { visibility: hidden; }
 
 .column:nth-child(1) p:nth-child(1) { margin-top: 38px; }
+
+cell > .form-group input{
+    border-radius: 5px;
+    background: #efefef;
+    padding: 3px 5px !important;
+}

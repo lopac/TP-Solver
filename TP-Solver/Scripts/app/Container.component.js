@@ -18,7 +18,7 @@ var ContainerComponent = (function () {
         this.componentFactoryResolver = componentFactoryResolver;
         this.viewContainerRef = viewContainerRef;
         this.matrixRef = null;
-        this.resetMatrix(4, 5);
+        this.resetMatrix(4, 4);
     }
     ContainerComponent.prototype.resetMatrix = function (rows, cols) {
         if (this.matrixRef) {
@@ -57,7 +57,7 @@ var ContainerComponent = (function () {
 ContainerComponent = __decorate([
     core_1.Component({
         selector: 'container',
-        template: "<p class=\"lead pull-left text-center\">Rows</p>\n        <p class=\"lead pull-right text-center\">Columns</p>\n        <span class=\"clear\"></span>\n\n        <div class=\"buttons\">\n            <button class=\"btn btn-default pull-left\" (click)=\"decrementRows()\"><span class=\"glyphicon glyphicon-minus\"></span></button>\n            <p class=\"pull-left\">{{rows - 1}}</p>\n            <button class=\"btn btn-default pull-left\" (click)=\"incrementRows()\"><span class=\"glyphicon glyphicon-plus\"></span></button>\n\n            <button class=\"btn btn-default pull-right\" (click)=\"incrementCols()\"><span class=\"glyphicon glyphicon-plus\"></span></button>\n            <p class=\"pull-right\">{{columns - 1}}</p>\n            <button class=\"btn btn-default pull-right\" (click)=\"decrementCols()\"><span class=\"glyphicon glyphicon-minus\"></span></button>\n\n            <span class=\"clear\"></span>\n        </div>\n        "
+        template: "\n\n        <div class=\"buttons row text-center\" style=\"margin: 0;\">\n            <p class=\"lead col-md-3 col-md-offset-2 col-sm-4 col-sm-offset-2 col-xs-4 col-xs-offset-2 text-center\">Rows</p>\n\n            <button class=\"btn btn-default col-md-2 col-sm-2 col-xs-2\" (click)=\"decrementRows()\"><span class=\"glyphicon glyphicon-minus\"></span></button>\n            <p class=\"col-md-1 col-sm-1 col-xs-1\">{{rows - 1}}</p>\n            <button class=\"btn btn-default col-md-2 col-sm-2 col-xs-2\" (click)=\"incrementRows()\"><span class=\"glyphicon glyphicon-plus\"></span></button>\n        </div>\n\n        <div class=\"buttons row text-center\" style=\"margin: 0;\">\n            <p class=\"lead col-md-3 col-md-offset-2  col-sm-4  col-sm-offset-2 col-xs-4  col-xs-offset-2 text-center\">Columns</p>\n\n            <button class=\"btn btn-default col-md-2  col-sm-2 col-xs-2\" (click)=\"decrementCols()\"><span class=\"glyphicon glyphicon-minus\"></span></button>\n            <p class=\"col-md-1 col-sm-1 col-xs-1\">{{columns - 1}}</p>\n            <button class=\"btn btn-default col-md-2 col-sm-2 col-xs-2\" (click)=\"incrementCols()\"><span class=\"glyphicon glyphicon-plus\"></span></button>\n\n        </div>\n        "
     }),
     __metadata("design:paramtypes", [core_2.ComponentFactoryResolver,
         core_3.ViewContainerRef])

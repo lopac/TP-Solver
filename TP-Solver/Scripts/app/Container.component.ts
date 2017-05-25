@@ -8,20 +8,23 @@ import { MatrixSize } from "./MatrixService.js";
 
 @Component({
     selector: 'container',
-    template: `<p class="lead pull-left text-center">Rows</p>
-        <p class="lead pull-right text-center">Columns</p>
-        <span class="clear"></span>
+    template: `
 
-        <div class="buttons">
-            <button class="btn btn-default pull-left" (click)="decrementRows()"><span class="glyphicon glyphicon-minus"></span></button>
-            <p class="pull-left">{{rows - 1}}</p>
-            <button class="btn btn-default pull-left" (click)="incrementRows()"><span class="glyphicon glyphicon-plus"></span></button>
+        <div class="buttons row text-center" style="margin: 0;">
+            <p class="lead col-md-3 col-md-offset-2 col-sm-4 col-sm-offset-2 col-xs-4 col-xs-offset-2 text-center">Rows</p>
 
-            <button class="btn btn-default pull-right" (click)="incrementCols()"><span class="glyphicon glyphicon-plus"></span></button>
-            <p class="pull-right">{{columns - 1}}</p>
-            <button class="btn btn-default pull-right" (click)="decrementCols()"><span class="glyphicon glyphicon-minus"></span></button>
+            <button class="btn btn-default col-md-2 col-sm-2 col-xs-2" (click)="decrementRows()"><span class="glyphicon glyphicon-minus"></span></button>
+            <p class="col-md-1 col-sm-1 col-xs-1">{{rows - 1}}</p>
+            <button class="btn btn-default col-md-2 col-sm-2 col-xs-2" (click)="incrementRows()"><span class="glyphicon glyphicon-plus"></span></button>
+        </div>
 
-            <span class="clear"></span>
+        <div class="buttons row text-center" style="margin: 0;">
+            <p class="lead col-md-3 col-md-offset-2  col-sm-4  col-sm-offset-2 col-xs-4  col-xs-offset-2 text-center">Columns</p>
+
+            <button class="btn btn-default col-md-2  col-sm-2 col-xs-2" (click)="decrementCols()"><span class="glyphicon glyphicon-minus"></span></button>
+            <p class="col-md-1 col-sm-1 col-xs-1">{{columns - 1}}</p>
+            <button class="btn btn-default col-md-2 col-sm-2 col-xs-2" (click)="incrementCols()"><span class="glyphicon glyphicon-plus"></span></button>
+
         </div>
         `
 })
@@ -76,7 +79,7 @@ export class ContainerComponent {
     constructor(private componentFactoryResolver: ComponentFactoryResolver,
         private viewContainerRef: ViewContainerRef) {
 
-        this.resetMatrix(4, 5);
+        this.resetMatrix(4, 4);
     }
 
 
