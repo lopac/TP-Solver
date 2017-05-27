@@ -56,7 +56,7 @@ namespace TP_Solver.Models
 
         private void AllocateRow(int row, int column)
         {
-            for (var j = column + 1; j < _array.GetLength(0); j++)
+            for (var j = column + 1; j < _array.GetLength(1); j++)
             {
                 _array[row, j].Allocated = CellState.Allocated;
             }

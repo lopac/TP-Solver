@@ -179,6 +179,7 @@
     <TypeScriptCompile Include="Scripts\app\Container.component.ts" />
     <TypeScriptCompile Include="Scripts\app\Matrix.component.ts" />
     <TypeScriptCompile Include="Scripts\app\Matrix.ts" />
+    <TypeScriptCompile Include="Scripts\app\ResultMatrix.component.ts" />
     <TypeScriptCompile Include="Scripts\app\ResultMatrix.ts" />
     <TypeScriptCompile Include="Scripts\main.ts" />
     <TypeScriptCompile Include="Scripts\typings\angularjs\angular-animate.d.ts" />

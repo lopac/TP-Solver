@@ -11,15 +11,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require("@angular/core");
 var Matrix_js_1 = require("./Matrix.js");
 var MatrixService_js_1 = require("./MatrixService.js");
+var ResultMatrix_component_js_1 = require("./ResultMatrix.component.js");
 var MatrixComponent = (function () {
-    function MatrixComponent(matrixService) {
+    function MatrixComponent(matrixService, target, componentFactoryResolver) {
+        this.matrixService = matrixService;
+        this.target = target;
+        this.componentFactoryResolver = componentFactoryResolver;
         this.columns = [];
         this.rows = [];
         this.cells = [];
         this.cellsViews = [];
+        this.resultMatrices = [];
         this._rows = 0;
         this._cols = 0;
-        this.matrixService = matrixService;
         this._rows = this.matrixService.matrixSize.rows;
         this._cols = this.matrixService.matrixSize.columns;
         for (var i = 0; i < this._cols; i++) {
@@ -42,14 +46,15 @@ var MatrixComponent = (function () {
             var cell = _a[_i];
             var row = Number(cell.row);
             var col = Number(cell.col);
+            var value = Number(cell.value);
             if (row === matrix.rows && col !== matrix.columns) {
-                matrix.demands.push(cell.value);
+                matrix.demands.push(value);
             }
             else if (col === matrix.columns && row !== matrix.rows) {
-                matrix.supplies.push(cell.value);
+                matrix.supplies.push(value);
             }
             else if (row !== matrix.rows && col !== matrix.columns) {
-                matrix.matrix[row][col] = Number(cell.value);
+                matrix.matrix[row][col] = value;
             }
         }
         return matrix;
@@ -57,20 +62,41 @@ var MatrixComponent = (function () {
     MatrixComponent.prototype.calculate = function () {
         var _this = this;
         var matrix = this.buildMatrix();
-        console.log(JSON.stringify(matrix));
-        $.post("/api/Solve/NorthWest", matrix, function (data) {
-            var result = data;
-            _this.resultTitle.nativeElement.innerHTML = "Result:";
-            _this.resultView.nativeElement.innerHTML = result.resultFunction;
-        }).fail();
+        var demandsSum = matrix.demands.reduce(function (a, b) { return a + b; }, 0);
+        var suppliesSum = matrix.supplies.reduce(function (a, b) { return a + b; }, 0);
+        console.log(demandsSum);
+        console.log(suppliesSum);
+        if (demandsSum !== suppliesSum) {
+            alert("Error \nDemands and supplies must have same sum!");
+        }
+        else {
+            $.post("/api/Solve/NorthWest", matrix, function (data) { return _this.showResult(data); }).fail(function (f) { return alert(f.responseJSON.ExceptionMessage); });
+        }
+    };
+    MatrixComponent.prototype.showResult = function (result) {
+        this.resultTitle.nativeElement.innerHTML = "Result:";
+        this.resultView.nativeElement.innerHTML = result.resultFunction;
+        this.resultStepsTitle.nativeElement.innerHTML = "Steps:";
+        for (var _i = 0, _a = result.matrices; _i < _a.length; _i++) {
+            var resultMatrix = _a[_i];
+            var factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrix_component_js_1.ResultMatrixComponent);
+            var component = this.target.createComponent(factory);
+            this.resultMatrices.push(component);
+            component.instance.setResultMatrix(resultMatrix);
+        }
     };
     MatrixComponent.prototype.reset = function () {
         for (var _i = 0, _a = this.cellsArray.toArray(); _i < _a.length; _i++) {
             var cell = _a[_i];
             cell.value = 0;
         }
+        for (var _b = 0, _c = this.resultMatrices; _b < _c.length; _b++) {
+            var matrix = _c[_b];
+            matrix.destroy();
+        }
         this.resultTitle.nativeElement.innerHTML = "";
         this.resultView.nativeElement.innerHTML = "";
+        this.resultStepsTitle.nativeElement.innerHTML = "";
     };
     return MatrixComponent;
 }());
@@ -86,12 +112,17 @@ __decorate([
     core_1.ViewChild("resultTitle"),
     __metadata("design:type", core_1.ElementRef)
 ], MatrixComponent.prototype, "resultTitle", void 0);
+__decorate([
+    core_1.ViewChild("resultStepsTitle"),
+    __metadata("design:type", core_1.ElementRef)
+], MatrixComponent.prototype, "resultStepsTitle", void 0);
 MatrixComponent = __decorate([
     core_1.Component({
         selector: "matrix",
-        template: "\n\n\n        <div #matrix class=\"matrix\">\n\n            <div class=\"column\" >\n                <p *ngFor=\"let s of rows\" class=\"{{s.Class}}\" style=\"height: 38px; margin-bottom: 15px;\" >{{s.value}}</p>\n            </div>\n\n            <div class=\"column\" *ngFor=\"let col of columns\">\n                <p class=\"mhead text-center\">{{col.Value}}</p>\n                <cell *ngFor=\"let row of cells\" #cell row=\"{{row.id}}\" col=\"{{col.id}}\"  class=\"{{row.Class}} {{col.Class}}\" ></cell>\n            </div>\n        </div>\n\n        <button (click)=\"calculate()\" class=\"btn btn-primary btn-lg btn-block col-md-12\">Calculate</button>\n        <button (click)=\"reset()\" class=\"btn btn-default btn-lg btn-block col-md-12\">Reset</button>\n\n        <p #resultTitle class=\"title\" ></p>\n        <p #result></p>\n"
+        template: "\n\n\n        <div #matrix class=\"matrix\">\n\n            <div class=\"column\" >\n                <p *ngFor=\"let s of rows\" class=\"{{s.Class}}\"  >{{s.value}}</p>\n            </div>\n\n            <div class=\"column\" *ngFor=\"let col of columns\">\n                <p class=\"mhead text-center\">{{col.Value}}</p>\n                <cell *ngFor=\"let row of cells\" #cell row=\"{{row.id}}\" col=\"{{col.id}}\"  class=\"{{row.Class}} {{col.Class}}\" ></cell>\n            </div>\n        </div>\n\n        <button (click)=\"calculate()\" class=\"btn btn-primary btn-lg btn-block col-md-12\">Calculate</button>\n        <button (click)=\"reset()\" class=\"btn btn-default btn-lg btn-block col-md-12\">Reset</button>\n\n        <p #resultTitle class=\"title\" ></p>\n        <p #result></p>\n        <p #resultStepsTitle class=\"title\"></p>\n\n"
     }),
-    __metadata("design:paramtypes", [MatrixService_js_1.MatrixService])
+    __metadata("design:paramtypes", [MatrixService_js_1.MatrixService, core_1.ViewContainerRef,
+        core_1.ComponentFactoryResolver])
 ], MatrixComponent);
 exports.MatrixComponent = MatrixComponent;
 //# sourceMappingURL=Matrix.component.js.map

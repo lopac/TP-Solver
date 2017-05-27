@@ -1,8 +1,9 @@
-﻿import { Component,  ViewChild, ViewChildren, QueryList, ElementRef } from "@angular/core";
+﻿import { Component,ComponentRef,  ViewChild, ViewChildren, QueryList, ElementRef, ViewContainerRef, ComponentFactoryResolver } from "@angular/core";
 import { Matrix } from "./Matrix.js";
 import { MatrixService } from "./MatrixService.js";
 import { CellComponent } from "./Cell.component.js";
 import { ResultMatrix } from "./ResultMatrix.js";
+import { ResultMatrixComponent } from "./ResultMatrix.component.js";
 
 @Component({
     selector: "matrix",
@@ -12,7 +13,7 @@ import { ResultMatrix } from "./ResultMatrix.js";
         <div #matrix class="matrix">
 
             <div class="column" >
-                <p *ngFor="let s of rows" class="{{s.Class}}" style="height: 38px; margin-bottom: 15px;" >{{s.value}}</p>
+                <p *ngFor="let s of rows" class="{{s.Class}}"  >{{s.value}}</p>
             </div>
 
             <div class="column" *ngFor="let col of columns">
@@ -26,6 +27,8 @@ import { ResultMatrix } from "./ResultMatrix.js";
 
         <p #resultTitle class="title" ></p>
         <p #result></p>
+        <p #resultStepsTitle class="title"></p>
+
 `
 })
 export class MatrixComponent {
@@ -42,13 +45,17 @@ export class MatrixComponent {
     @ViewChild("resultTitle")
     resultTitle: ElementRef;
 
+    @ViewChild("resultStepsTitle")
+    resultStepsTitle: ElementRef;
+
+    resultMatrices: Array<ComponentRef<ResultMatrixComponent>> = [];
+
+
     private _rows: number = 0;
     private _cols: number = 0;
-    private matrixService: MatrixService;
 
-    constructor(matrixService: MatrixService) {
-
-        this.matrixService = matrixService;
+    constructor(private matrixService: MatrixService, private target: ViewContainerRef,
+        private componentFactoryResolver: ComponentFactoryResolver) {
 
         this._rows = this.matrixService.matrixSize.rows;
         this._cols = this.matrixService.matrixSize.columns;
@@ -83,18 +90,19 @@ export class MatrixComponent {
 
             const row = Number(cell.row);
             const col = Number(cell.col);
+            const value = Number(cell.value);
 
             //Demand cell
             if (row === matrix.rows && col !== matrix.columns) {
-                matrix.demands.push(cell.value);
+                matrix.demands.push(value);
             }
             //Supply cell
             else if (col === matrix.columns && row !== matrix.rows) {
-                matrix.supplies.push(cell.value);
+                matrix.supplies.push(value);
             }
             //Regular cell
             else if (row !== matrix.rows && col !== matrix.columns) {
-                matrix.matrix[row][col] = Number(cell.value);
+                matrix.matrix[row][col] = value;
             }
         }
 
@@ -102,23 +110,45 @@ export class MatrixComponent {
         return matrix;
     }
 
+
+
     calculate() {
         let matrix = this.buildMatrix();
 
-        console.log(JSON.stringify(matrix));
+        const demandsSum = matrix.demands.reduce((a, b) => a + b, 0);
+        const suppliesSum = matrix.supplies.reduce((a, b) => a + b, 0);
 
-        $.post("/api/Solve/NorthWest",
-            matrix,
-            data => {
-                var result: { matrices: Array<ResultMatrix>, resultFunction: string } = data;
+        console.log(demandsSum);
+        console.log(suppliesSum);
 
-                //console.log(JSON.stringify(result));
+        if (demandsSum !== suppliesSum) {
+            alert("Error \nDemands and supplies must have same sum!");
+        } else {
 
-                this.resultTitle.nativeElement.innerHTML = "Result:";
-                this.resultView.nativeElement.innerHTML = result.resultFunction;
+            $.post("/api/Solve/NorthWest", matrix, data => this.showResult(data)).fail(f => alert(f.responseJSON.ExceptionMessage));
+
+        }
 
 
-            }).fail();
+
+    }
+
+    private showResult(result: { matrices: Array<ResultMatrix>, resultFunction: string }) {
+
+        this.resultTitle.nativeElement.innerHTML = "Result:";
+        this.resultView.nativeElement.innerHTML = result.resultFunction;
+
+        this.resultStepsTitle.nativeElement.innerHTML = "Steps:";
+
+
+        for (let resultMatrix of result.matrices) {
+            const factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrixComponent);
+            const component = this.target.createComponent(factory);
+            this.resultMatrices.push(component);
+            component.instance.setResultMatrix(resultMatrix);
+        }
+
+
 
     }
 
@@ -127,8 +157,14 @@ export class MatrixComponent {
             cell.value = 0;
         }
 
+        for (let matrix of this.resultMatrices) {
+            matrix.destroy();
+        }
+
         this.resultTitle.nativeElement.innerHTML = "";
         this.resultView.nativeElement.innerHTML = "";
+        this.resultStepsTitle.nativeElement.innerHTML = "";
+
     }
 
 

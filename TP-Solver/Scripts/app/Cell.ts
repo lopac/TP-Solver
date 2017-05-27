@@ -1,9 +1,9 @@
 ﻿export class Cell {
-    allocated: number;
-    value: number;
+    Allocated: number;
+    Value: number;
 
     constructor() {
-        this.allocated = 0;
-        this.value = 0;
+        this.Allocated = 0;
+        this.Value = 0;
     }
 }

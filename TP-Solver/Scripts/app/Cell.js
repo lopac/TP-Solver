@@ -1,8 +1,8 @@
 "use strict";
 var Cell = (function () {
     function Cell() {
-        this.allocated = 0;
-        this.value = 0;
+        this.Allocated = 0;
+        this.Value = 0;
     }
     return Cell;
 }());
