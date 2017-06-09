@@ -16,7 +16,7 @@ var ResultMatrixComponent = (function () {
     }
     ResultMatrixComponent.prototype.setResultMatrix = function (value) {
         var header = "<div class=\"result-header\">";
-        for (var i_1 = 0; i_1 < value.Rows; i_1++) {
+        for (var i_1 = 0; i_1 < value.Columns; i_1++) {
             header += "<p class=\"mhead pull-left\">D " + (i_1 + 1) + "</p>";
         }
         header += "<p class=\"mhead pull-left\">S</p>";

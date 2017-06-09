@@ -10,9 +10,7 @@ namespace TP_Solver.Helpers
         {
             var solutionMatrices = new List<Matrix>();
 
-
-            while (matrix.Supplies.Any(x => x != CellState.Allocated) &&
-                   matrix.Demands.Any(x => x != CellState.Allocated))
+            while (matrix.Supplies.Any(x => x != CellState.Allocated) && matrix.Demands.Any(x => x != CellState.Allocated))
             {
                 for (var row = 0; row < matrix.GetLength(0); row++)
                 {

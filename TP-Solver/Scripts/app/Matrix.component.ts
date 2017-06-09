@@ -1,4 +1,4 @@
-﻿import { Component,ComponentRef,  ViewChild, ViewChildren, QueryList, ElementRef, ViewContainerRef, ComponentFactoryResolver } from "@angular/core";
+﻿import { Component, ComponentRef, ViewChild, ViewChildren, QueryList, ElementRef, ViewContainerRef, ComponentFactoryResolver } from "@angular/core";
 import { Matrix } from "./Matrix.js";
 import { MatrixService } from "./MatrixService.js";
 import { CellComponent } from "./Cell.component.js";
@@ -31,7 +31,8 @@ import { ResultMatrixComponent } from "./ResultMatrix.component.js";
 
 `
 })
-export class MatrixComponent {
+export class MatrixComponent
+{
 
     public columns: Array<any> = [];
     public rows: Array<any> = [];
@@ -55,20 +56,23 @@ export class MatrixComponent {
     private _cols: number = 0;
 
     constructor(private matrixService: MatrixService, private target: ViewContainerRef,
-        private componentFactoryResolver: ComponentFactoryResolver) {
+        private componentFactoryResolver: ComponentFactoryResolver)
+    {
 
         this._rows = this.matrixService.matrixSize.rows;
         this._cols = this.matrixService.matrixSize.columns;
 
 
-        for (let i = 0; i < this._cols; i++) {
+        for (let i = 0; i < this._cols; i++)
+        {
             this.columns.push(i === this._cols - 1
                 ? { Class: "finalColumn", Value: `S`, id: i }
                 : { Class: "", Value: `D ${i + 1}`, id: i });
         }
 
 
-        for (let i = 0; i < this._rows; i++) {
+        for (let i = 0; i < this._rows; i++)
+        {
             this.cells.push(i === this._rows - 1
                 ? { Class: "finalRow", id: i }
                 : { Class: "", id: i });
@@ -82,26 +86,31 @@ export class MatrixComponent {
 
     }
 
-    private buildMatrix(): Matrix {
+    private buildMatrix(): Matrix
+    {
 
         let matrix = new Matrix(this._rows - 1, this._cols - 1);
 
-        for (let cell of this.cellsArray.toArray()) {
+        for (let cell of this.cellsArray.toArray())
+        {
 
             const row = Number(cell.row);
             const col = Number(cell.col);
             const value = Number(cell.value);
 
             //Demand cell
-            if (row === matrix.rows && col !== matrix.columns) {
+            if (row === matrix.rows && col !== matrix.columns)
+            {
                 matrix.demands.push(value);
             }
             //Supply cell
-            else if (col === matrix.columns && row !== matrix.rows) {
+            else if (col === matrix.columns && row !== matrix.rows)
+            {
                 matrix.supplies.push(value);
             }
             //Regular cell
-            else if (row !== matrix.rows && col !== matrix.columns) {
+            else if (row !== matrix.rows && col !== matrix.columns)
+            {
                 matrix.matrix[row][col] = value;
             }
         }
@@ -112,52 +121,58 @@ export class MatrixComponent {
 
 
 
-    calculate() {
+    calculate()
+    {
         let matrix = this.buildMatrix();
 
-        const demandsSum = matrix.demands.reduce((a, b) => a + b, 0);
-        const suppliesSum = matrix.supplies.reduce((a, b) => a + b, 0);
+        console.log(matrix);
 
-        console.log(demandsSum);
-        console.log(suppliesSum);
-
-        if (demandsSum !== suppliesSum) {
-            alert("Error \nDemands and supplies must have same sum!");
-        } else {
-
-            $.post("/api/Solve/NorthWest", matrix, data => this.showResult(data)).fail(f => alert(f.responseJSON.ExceptionMessage));
-
-        }
+        //const demandsSum = matrix.demands.reduce((a, b) => a + b, 0);
+        //const suppliesSum = matrix.supplies.reduce((a, b) => a + b, 0);
 
 
+        $.post("/api/Solve/NorthWest", matrix, data => this.showResult(data)).fail(f => alert(f.responseJSON.ExceptionMessage));
 
     }
 
-    private showResult(result: { matrices: Array<ResultMatrix>, resultFunction: string }) {
+    private showResult(result: { matrices: Array<ResultMatrix>, resultFunction: string })
+    {
+        console.log(result);
+
+        for (let matrix of this.resultMatrices)
+        {
+            matrix.destroy();
+        }
 
         this.resultTitle.nativeElement.innerHTML = "Result:";
         this.resultView.nativeElement.innerHTML = result.resultFunction;
 
-        this.resultStepsTitle.nativeElement.innerHTML = "Steps:";
+        if (result.matrices.length > 0)
+        {
+            this.resultStepsTitle.nativeElement.innerHTML = "Steps:";
 
 
-        for (let resultMatrix of result.matrices) {
-            const factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrixComponent);
-            const component = this.target.createComponent(factory);
-            this.resultMatrices.push(component);
-            component.instance.setResultMatrix(resultMatrix);
+            for (let resultMatrix of result.matrices)
+            {
+                const factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrixComponent);
+                const component = this.target.createComponent(factory);
+                this.resultMatrices.push(component);
+                component.instance.setResultMatrix(resultMatrix);
+            }
         }
-
 
 
     }
 
-    reset() {
-        for (let cell of this.cellsArray.toArray()) {
+    reset()
+    {
+        for (let cell of this.cellsArray.toArray())
+        {
             cell.value = 0;
         }
 
-        for (let matrix of this.resultMatrices) {
+        for (let matrix of this.resultMatrices)
+        {
             matrix.destroy();
         }
 

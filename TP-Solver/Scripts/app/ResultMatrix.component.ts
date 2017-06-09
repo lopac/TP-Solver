@@ -25,7 +25,7 @@ export class ResultMatrixComponent {
 
         let header = `<div class="result-header">`;
 
-        for (let i = 0; i < value.Rows; i++) {
+        for (let i = 0; i < value.Columns; i++) {
             header += `<p class="mhead pull-left">D ${i + 1}</p>`;
         }
 

@@ -29,11 +29,61 @@ namespace TP_Solver.Controllers.WebAPI
     {
         private Matrix GetMatrixFromViewModel(MatrixViewModel matrixView)
         {
-            var matrix = new Matrix(matrixView.Rows, matrixView.Columns)
+            Matrix matrix;
+
+            if (matrixView.Demands.Sum() > matrixView.Supplies.Sum())
             {
-                Demands = matrixView.Demands,
-                Supplies = matrixView.Supplies
-            };
+                matrix = new Matrix(matrixView.Rows + 1, matrixView.Columns)
+                {
+                    Demands = matrixView.Demands,
+                };
+
+
+                var diff = matrixView.Demands.Sum() - matrixView.Supplies.Sum();
+
+
+                for (int i = 0; i < matrix.Supplies.Length; i++)
+                {
+                    if (i != matrix.Supplies.Length - 1)
+                    {
+                        matrix.Supplies[i] = matrixView.Supplies[i];
+                    }
+                    else
+                    {
+                        matrix.Supplies[i] = diff;
+                    }
+                }
+
+            }
+            else if (matrixView.Supplies.Sum() > matrixView.Demands.Sum())
+            {
+                matrix = new Matrix(matrixView.Rows, matrixView.Columns + 1)
+                {
+                    Supplies = matrixView.Supplies
+                };
+
+                var diff = matrixView.Supplies.Sum() - matrixView.Demands.Sum();
+
+                for (int i = 0; i < matrix.Demands.Length; i++)
+                {
+                    if (i != matrix.Demands.Length - 1)
+                    {
+                        matrix.Demands[i] = matrixView.Demands[i];
+                    }
+                    else
+                    {
+                        matrix.Demands[i] = diff;
+                    }
+                }
+            }
+            else
+            {
+                matrix = new Matrix(matrixView.Rows, matrixView.Columns)
+                {
+                    Demands = matrixView.Demands,
+                    Supplies = matrixView.Supplies
+                };
+            }
 
             for (int i = 0; i < matrixView.Rows; i++)
             {
@@ -81,11 +131,16 @@ namespace TP_Solver.Controllers.WebAPI
 
             var resultMatrices = solver.SolveNorthWest(GetMatrixFromViewModel(matrixView));
 
-            return Ok(new
+
+            var result = new
             {
-                matrices = resultMatrices?.Select(GetResultViewModelFromMatrix).ToList(),
-                resultFunction = resultMatrices.Last().ResultFunction
-            });
+                matrices = resultMatrices.Any()
+                    ? resultMatrices.Select(GetResultViewModelFromMatrix).ToList()
+                    : new List<ResultMatrixViewModel>(),
+                resultFunction = resultMatrices.Any() ? resultMatrices.Last().ResultFunction : "0"
+            };
+
+            return Ok(result);
         }
 
         [HttpPost, Route("api/Solve/LeastCost")]

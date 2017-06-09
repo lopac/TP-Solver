@@ -62,27 +62,26 @@ var MatrixComponent = (function () {
     MatrixComponent.prototype.calculate = function () {
         var _this = this;
         var matrix = this.buildMatrix();
-        var demandsSum = matrix.demands.reduce(function (a, b) { return a + b; }, 0);
-        var suppliesSum = matrix.supplies.reduce(function (a, b) { return a + b; }, 0);
-        console.log(demandsSum);
-        console.log(suppliesSum);
-        if (demandsSum !== suppliesSum) {
-            alert("Error \nDemands and supplies must have same sum!");
-        }
-        else {
-            $.post("/api/Solve/NorthWest", matrix, function (data) { return _this.showResult(data); }).fail(function (f) { return alert(f.responseJSON.ExceptionMessage); });
-        }
+        console.log(matrix);
+        $.post("/api/Solve/NorthWest", matrix, function (data) { return _this.showResult(data); }).fail(function (f) { return alert(f.responseJSON.ExceptionMessage); });
     };
     MatrixComponent.prototype.showResult = function (result) {
+        console.log(result);
+        for (var _i = 0, _a = this.resultMatrices; _i < _a.length; _i++) {
+            var matrix = _a[_i];
+            matrix.destroy();
+        }
         this.resultTitle.nativeElement.innerHTML = "Result:";
         this.resultView.nativeElement.innerHTML = result.resultFunction;
-        this.resultStepsTitle.nativeElement.innerHTML = "Steps:";
-        for (var _i = 0, _a = result.matrices; _i < _a.length; _i++) {
-            var resultMatrix = _a[_i];
-            var factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrix_component_js_1.ResultMatrixComponent);
-            var component = this.target.createComponent(factory);
-            this.resultMatrices.push(component);
-            component.instance.setResultMatrix(resultMatrix);
+        if (result.matrices.length > 0) {
+            this.resultStepsTitle.nativeElement.innerHTML = "Steps:";
+            for (var _b = 0, _c = result.matrices; _b < _c.length; _b++) {
+                var resultMatrix = _c[_b];
+                var factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrix_component_js_1.ResultMatrixComponent);
+                var component = this.target.createComponent(factory);
+                this.resultMatrices.push(component);
+                component.instance.setResultMatrix(resultMatrix);
+            }
         }
     };
     MatrixComponent.prototype.reset = function () {
