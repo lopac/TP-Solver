@@ -46,7 +46,7 @@ var MatrixComponent = (function () {
             var cell = _a[_i];
             var row = Number(cell.row);
             var col = Number(cell.col);
-            var value = Number(cell.value);
+            var value = cell.value;
             if (row === matrix.rows && col !== matrix.columns) {
                 matrix.demands.push(value);
             }
@@ -62,11 +62,10 @@ var MatrixComponent = (function () {
     MatrixComponent.prototype.calculate = function () {
         var _this = this;
         var matrix = this.buildMatrix();
-        console.log(matrix);
+        console.log(this.buildMatrix());
         $.post("/api/Solve/NorthWest", matrix, function (data) { return _this.showResult(data); }).fail(function (f) { return alert(f.responseJSON.ExceptionMessage); });
     };
     MatrixComponent.prototype.showResult = function (result) {
-        console.log(result);
         for (var _i = 0, _a = this.resultMatrices; _i < _a.length; _i++) {
             var matrix = _a[_i];
             matrix.destroy();

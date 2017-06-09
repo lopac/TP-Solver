@@ -1,23 +1,37 @@
-﻿import { Component, Input } from "@angular/core";
+﻿import { Component, Input, AfterViewInit, ElementRef } from "@angular/core";
 
 @Component({
     selector: "cell",
     template: `
         <div class="form-group" >
-            <input class="form-control" #cell (keyup)="refreshValue(cell.value);" cell.value value="{{value}}" type="number" required/>
+            <input class="form-control" value="0" type="number" required/>
         </div>
         `
 })
-export class CellComponent {
-    value: number = 0;
-
+export class CellComponent implements AfterViewInit
+{
+    private readonly element: ElementRef;
     @Input()
     row: number = -1;
 
     @Input()
     col: number = -1;
 
-    public refreshValue(value: number) {
-        this.value = value;
+
+    get value(): number { return $(this.element.nativeElement).find("input").val(); }
+
+    set value(value: number)
+    {
+        $(this.element.nativeElement).find("input").val(value);
     }
+
+    constructor(element: ElementRef)
+    {
+        this.element = element;
+    }
+
+    ngAfterViewInit(): void
+    {
+    }
+
 }

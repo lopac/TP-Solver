@@ -129,15 +129,23 @@ namespace TP_Solver.Controllers.WebAPI
         {
             var solver = new TransportationModelSolver();
 
-            var resultMatrices = solver.SolveNorthWest(GetMatrixFromViewModel(matrixView));
+
+            var matrix = GetMatrixFromViewModel(matrixView);
+            var builtMatrix = matrix.GetCopy();
+
+            var resultMatrices = solver.SolveNorthWest(matrix);
+
+
+            var matrices = new List<ResultMatrixViewModel> {GetResultViewModelFromMatrix(builtMatrix)};
+
+
+            resultMatrices.ForEach(x => matrices.Add(GetResultViewModelFromMatrix(x)));
 
 
             var result = new
             {
-                matrices = resultMatrices.Any()
-                    ? resultMatrices.Select(GetResultViewModelFromMatrix).ToList()
-                    : new List<ResultMatrixViewModel>(),
-                resultFunction = resultMatrices.Any() ? resultMatrices.Last().ResultFunction : "0"
+                matrices,
+                resultFunction = resultMatrices.Last().ResultFunction
             };
 
             return Ok(result);

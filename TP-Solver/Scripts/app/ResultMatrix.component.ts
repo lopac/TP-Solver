@@ -80,7 +80,6 @@ export class ResultMatrixComponent {
 
         $(this.matrixContainer.nativeElement).find(".result-cell").toArray().forEach(e => {
             let width = Number($(e).css("width").split("px")[0]);
-            console.log(width);
             if (width > maxWidth) {
                 maxWidth = width;
             }

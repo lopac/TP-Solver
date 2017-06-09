@@ -52,7 +52,6 @@ var ResultMatrixComponent = (function () {
         var maxWidth = 0;
         $(this.matrixContainer.nativeElement).find(".result-cell").toArray().forEach(function (e) {
             var width = Number($(e).css("width").split("px")[0]);
-            console.log(width);
             if (width > maxWidth) {
                 maxWidth = width;
             }

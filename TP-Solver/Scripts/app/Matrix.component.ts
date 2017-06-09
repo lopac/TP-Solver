@@ -96,7 +96,7 @@ export class MatrixComponent
 
             const row = Number(cell.row);
             const col = Number(cell.col);
-            const value = Number(cell.value);
+            const value = cell.value;
 
             //Demand cell
             if (row === matrix.rows && col !== matrix.columns)
@@ -125,11 +125,9 @@ export class MatrixComponent
     {
         let matrix = this.buildMatrix();
 
-        console.log(matrix);
 
-        //const demandsSum = matrix.demands.reduce((a, b) => a + b, 0);
-        //const suppliesSum = matrix.supplies.reduce((a, b) => a + b, 0);
 
+        console.log(this.buildMatrix());
 
         $.post("/api/Solve/NorthWest", matrix, data => this.showResult(data)).fail(f => alert(f.responseJSON.ExceptionMessage));
 
@@ -137,7 +135,7 @@ export class MatrixComponent
 
     private showResult(result: { matrices: Array<ResultMatrix>, resultFunction: string })
     {
-        console.log(result);
+        //console.log(result);
 
         for (let matrix of this.resultMatrices)
         {
@@ -168,7 +166,7 @@ export class MatrixComponent
     {
         for (let cell of this.cellsArray.toArray())
         {
-            cell.value = 0;
+           cell.value = 0;
         }
 
         for (let matrix of this.resultMatrices)

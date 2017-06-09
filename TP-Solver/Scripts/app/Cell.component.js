@@ -10,13 +10,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require("@angular/core");
 var CellComponent = (function () {
-    function CellComponent() {
-        this.value = 0;
+    function CellComponent(element) {
         this.row = -1;
         this.col = -1;
+        this.element = element;
     }
-    CellComponent.prototype.refreshValue = function (value) {
-        this.value = value;
+    Object.defineProperty(CellComponent.prototype, "value", {
+        get: function () { return $(this.element.nativeElement).find("input").val(); },
+        set: function (value) {
+            $(this.element.nativeElement).find("input").val(value);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    CellComponent.prototype.ngAfterViewInit = function () {
     };
     return CellComponent;
 }());
@@ -31,8 +38,9 @@ __decorate([
 CellComponent = __decorate([
     core_1.Component({
         selector: "cell",
-        template: "\n        <div class=\"form-group\" >\n            <input class=\"form-control\" #cell (keyup)=\"refreshValue(cell.value);\" cell.value value=\"{{value}}\" type=\"number\" required/>\n        </div>\n        "
-    })
+        template: "\n        <div class=\"form-group\" >\n            <input class=\"form-control\" value=\"0\" type=\"number\" required/>\n        </div>\n        "
+    }),
+    __metadata("design:paramtypes", [core_1.ElementRef])
 ], CellComponent);
 exports.CellComponent = CellComponent;
 //# sourceMappingURL=Cell.component.js.map
