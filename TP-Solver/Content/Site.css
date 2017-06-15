@@ -20,13 +20,40 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
     margin: 0 auto;
 }
 
-
 /*matrix {
     display: table;
     margin: 0 auto;
 }*/
 
-container > p {
+.ui, .vj {
+    background: #555 !important;
+    color: white;
+}
+
+.info p {
+    font-size: 20px;
+    line-height: 15px;
+}
+
+.info p:first-child, .info p:last-child { font-weight: bold; }
+
+.green-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #50c878 !important;
+    color: #50c878 !important;
+}
+
+.red-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: crimson !important;
+    color: crimson !important;
+}
+
+.container > p {
     margin-left: 10px;
     margin-right: 10px;
 }
@@ -83,14 +110,12 @@ cell > div.form-group { float: left !important; }
     width: 70px;
 }
 
-.matrix .column:first-child {
-    width: 40px;
-}
+.matrix .column:first-child { width: 40px; }
 
 .matrix .column:first-child > p {
-     width: 40px;
-     height: 38px;
-     margin: 15px 0;
+    width: 40px;
+    height: 38px;
+    margin: 15px 0;
 }
 
 .mhead {
@@ -141,13 +166,11 @@ cell > .form-group input {
 }
 
 .result-matrix .result-header > p {
-     margin: 2px;
+    margin: 2px;
     text-align: center;
 }
 
-.result-matrix .result-header > p:first-child {
-    margin-left: 34.722px;
-}
+.result-matrix .result-header > p:first-child { margin-left: 34.722px; }
 
 .result-matrix .result-row > p {
     margin-right: 10px;
@@ -156,18 +179,16 @@ cell > .form-group input {
 
 
 .result-cell.allocated {
-    background: #dcdcdc !important;
-    color: cornflowerblue;
+    background: #efefef !important;
+    color: inherit;
 }
 
 .result-cell.relative-allocated {
-    background: #eee !important;
-    color: crimson !important;
+    background: #efefef !important;
+    color: inherit;
 }
 
-.result-cell.crossed {
-    background: #dcdcdc !important;
-}
+.result-cell.crossed { background: #efefef !important; }
 
 .result-cell.supply, .result-cell.demand {
     background: #777 !important;
@@ -179,7 +200,7 @@ cell > .form-group input {
 .result-cell {
     font-size: 18px;
     border-radius: 5px;
-    background: #f5f5f5;
+    background: #fafafa;
     padding: 3px 5px !important;
     box-shadow: inset 0 -1px 0 #ddd;
     margin: 2px;

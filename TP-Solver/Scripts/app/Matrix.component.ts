@@ -1,43 +1,55 @@
-﻿import { Component, ComponentRef, ViewChild, ViewChildren, QueryList, ElementRef, ViewContainerRef,
-    ComponentFactoryResolver } from "@angular/core";
+﻿import
+{
+    Component, ComponentRef, ViewChild, ViewChildren, QueryList, ElementRef, ViewContainerRef,
+    ComponentFactoryResolver
+} from "@angular/core";
 import { Matrix } from "./Matrix.js";
 import { MatrixService } from "./MatrixService.js";
 import { CellComponent } from "./Cell.component.js";
 import { Cell } from "./Cell.js";
 import { ResultMatrixComponent } from "./ResultMatrix.component.js";
 
-interface IResult {
+interface IResult
+{
     InitialMatrix: Matrix;
-    ModiOptimalMatrix: Matrix;
-    VamStepsMatrices: Array<Matrix>;
+    ModiStepsMatrices: Array<Matrix>;
+    StepsMatrices: Array<Matrix>;
+    UsedFeasibleMethod: string;
 }
 
 @Component({
     selector: "matrix",
     template: `
-<div #matrix class="matrix">
+        <div #matrix>
             <div class="matrix">
                 <div class="column">
-                    <p *ngFor="let s of rows" class="{{s.Class}}">{{s.value}}</p>
+                    <p *ngFor="let s of rows" class="{{s.Class}}">{{s.Title}}<sub>{{s.value}}</sub></p>
                 </div>
 
                 <div class="column" *ngFor="let col of columns">
-                    <p class="mhead text-center">{{col.Value}}</p>
+                    <p class="mhead text-center">{{col.Title}}<sub>{{col.Value}}</sub></p>
                     <cell *ngFor="let row of cells" #cell row="{{row.id}}" col="{{col.id}}" class="{{row.Class}} {{col.Class}}"></cell>
                 </div>
             </div>
             <button (click)="calculate()" class="btn btn-primary btn-block btn-lg">Izračunaj</button>
-            <button (click)="setCellsValueToRandom()" class="btn btn-info btn-block btn-lg">Nasumični brojevi</button>
+            <button (click)="setCellsValueToRandom()" id="rand-btn" style="display: none;" class="btn btn-info btn-block btn-lg">Nasumični brojevi</button>
             <button (click)="reset()" class="btn btn-default btn-block btn-lg">Resetiraj</button>
         </div>
 
-<p #resultTitle class="title" style="max-width: 600px;display: block; word-wrap: break-word;"></p>
-<p #result></p>
-<p #resultStepsTitle class="title"></p>
+        <p class="text-center"><i class="glyphicon green-circle"> </i> Alokacija</p>
+        <p class="text-center"><i class="glyphicon red-circle"> </i> Relativni trošak</p>
+
+        <p #resultTitle class="title" style="max-width: 600px;display: block; word-wrap: break-word;"></p>
+        <p #result></p>
+
+
+        <p #resultStepsTitle class="title"></p>
+        <div #info class="info text-center"></div>
 
 `
 })
-export class MatrixComponent {
+export class MatrixComponent
+{
 
     public columns: Array<any> = [];
     public rows: Array<any> = [];
@@ -50,6 +62,9 @@ export class MatrixComponent {
     resultView: ElementRef;
     @ViewChild("resultTitle")
     resultTitle: ElementRef;
+
+    @ViewChild("info")
+    infoDiv: ElementRef;
 
     @ViewChild("resultStepsTitle")
     resultStepsTitle: ElementRef;
@@ -71,8 +86,8 @@ export class MatrixComponent {
         for (let i = 0; i < this._cols; i++)
         {
             this.columns.push(i === this._cols - 1
-                ? { Class: "finalColumn", Value: `I`, id: i }
-                : { Class: "", Value: `O ${i + 1}`, id: i });
+                ? { Class: "finalColumn", Title: "I", Value: ``, id: i }
+                : { Class: "", Title: "O ", Value: `${i + 1}`, id: i });
         }
 
 
@@ -84,8 +99,8 @@ export class MatrixComponent {
 
 
             this.rows.push(i !== this._rows - 1
-                ? { Class: "mhead", value: `I ${i + 1}` }
-                : { Class: "mhead last", value: "O" });
+                ? { Class: "mhead", Title: "I ", value: `${i + 1}` }
+                : { Class: "mhead last", Title: "O", value: "" });
         }
     }
 
@@ -136,8 +151,6 @@ export class MatrixComponent {
 
 
         //console.log(this.buildMatrix());
-
-
         $.ajax({
             type: "POST",
             data: JSON.stringify(matrix),
@@ -164,15 +177,24 @@ export class MatrixComponent {
         }
 
         this.resultTitle.nativeElement.innerHTML = "Rezultat:";
-        this.resultView.nativeElement.innerHTML = result.VamStepsMatrices[result.VamStepsMatrices.length - 1]
-            .ResultFunction;
+        this.resultView.nativeElement.innerHTML = result.StepsMatrices[result.StepsMatrices.length - 1].ResultFunction;
 
-        if (result.VamStepsMatrices.length > 0)
+
+
+        const factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrixComponent);
+        const component = this.target.createComponent(factory);
+        this.resultMatrices.push(component);
+        component.instance.setResultMatrix(result.InitialMatrix);
+
+        this.infoDiv.nativeElement.innerHTML = `<p>Korištena metoda za pronalazak početnog rasporeda:<p/><p>${result.UsedFeasibleMethod}</p><p>Inicijalna matrica:</p>`;
+
+
+        if (result.StepsMatrices.length > 0)
         {
             this.resultStepsTitle.nativeElement.innerHTML = "Koraci: ";
 
 
-            for (let resultMatrix of result.VamStepsMatrices)
+            for (let resultMatrix of result.StepsMatrices)
             {
                 const factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrixComponent);
                 const component = this.target.createComponent(factory);
@@ -181,13 +203,24 @@ export class MatrixComponent {
             }
 
 
-            this.resultTitle.nativeElement.innerHTML = "Rezultat:";
-            this.resultView.nativeElement.innerHTML = result.ModiOptimalMatrix.ResultFunction;
+            let isFirst = true;
 
-            const factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrixComponent);
-            const component = this.target.createComponent(factory);
-            this.resultMatrices.push(component);
-            component.instance.setResultMatrix(result.ModiOptimalMatrix);
+            for (let resultMatrix of result.ModiStepsMatrices)
+            {
+                const factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrixComponent);
+                const component = this.target.createComponent(factory);
+                this.resultMatrices.push(component);
+                if (resultMatrix == result.ModiStepsMatrices[result.ModiStepsMatrices.length - 1])
+                {
+                    component.instance.setModiResultMatrix(resultMatrix, true);
+                } else
+                {
+                    component.instance.setModiResultMatrix(resultMatrix, false, isFirst);
+                    isFirst = false;
+                }
+
+            }
+
         }
     }
 
@@ -206,6 +239,8 @@ export class MatrixComponent {
         this.resultTitle.nativeElement.innerHTML = "";
         this.resultView.nativeElement.innerHTML = "";
         this.resultStepsTitle.nativeElement.innerHTML = "";
+        this.infoDiv.nativeElement.innerHTML = "";
+
     }
 
 

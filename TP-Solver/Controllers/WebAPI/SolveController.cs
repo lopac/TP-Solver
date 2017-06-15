@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using Antlr.Runtime.Misc;
 using TP_Solver.Helpers;
 using TP_Solver.Models;
 
@@ -61,8 +62,9 @@ namespace TP_Solver.Controllers.WebAPI
     public class ResultViewModel
     {
         public Matrix InitialMatrix { get; set; }
-        public Matrix ModiOptimalMatrix { get; set; }
-        public IEnumerable<Matrix> VamStepsMatrices { get; set; }
+        public IEnumerable<Matrix> ModiStepsMatrices { get; set; }
+        public IEnumerable<Matrix> StepsMatrices { get; set; }
+        public string UsedFeasibleMethod { get; set; }
     }
     public class SolveController : ApiController
     {
@@ -72,15 +74,51 @@ namespace TP_Solver.Controllers.WebAPI
 
             var builtMatrix = matrix.GetCopy();
 
-            var feasibleMatrices = matrix.GetFeasibleSolution();
 
-            var optimalMatrix = feasibleMatrices.Last().GetCopy().GetOptimalSolution();
+            var feasibleFunctions = new List<Func<Matrix, List<Matrix>>>
+            {
+                TPSolver.GetLeastCostFeasibleSolution,
+                TPSolver.GetVamFeasibleSolution,
+                TPSolver.GetNorthWestFeasibleSolution
+            };
+
+            var stepsMatrices = new List<Matrix>();
+            var optimalMatrices = new List<Matrix>();
+
+            var usedFeasibleMethod = "Metoda sjeverozapadnog kuta";
+
+            foreach (var getFeasible in feasibleFunctions)
+            {
+                stepsMatrices.Clear();
+                stepsMatrices = getFeasible(builtMatrix.GetCopy());
+                optimalMatrices = stepsMatrices.Last().GetCopy().GetOptimalSolution();
+
+                if (optimalMatrices != null)
+                {
+                    switch (feasibleFunctions.IndexOf(getFeasible))
+                    {
+                        case 0:
+                            usedFeasibleMethod = "Metoda minimalnih troškova";
+                            break;
+                        case 1:
+                            usedFeasibleMethod = "Vogelova aproksimativna metoda";
+                            break;
+                        case 2:
+                            usedFeasibleMethod = "Metoda sjeverozapadnog kuta";
+                            break;
+                    }
+
+                    break;
+                }
+
+            }
 
             return Ok(new ResultViewModel
             {
                 InitialMatrix = builtMatrix,
-                VamStepsMatrices = feasibleMatrices,
-                ModiOptimalMatrix = optimalMatrix
+                StepsMatrices = stepsMatrices,
+                ModiStepsMatrices = optimalMatrices,
+                UsedFeasibleMethod = usedFeasibleMethod
             });
         }
     }

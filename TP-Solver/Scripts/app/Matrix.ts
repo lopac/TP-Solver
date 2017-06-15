@@ -8,6 +8,9 @@ export class Matrix {
     public Supplies: Array<number> = [];
     public Demands: Array<number> = [];
 
+    public U: Array<number> = [];
+    public V: Array<number> = [];
+
     public ResultFunction: string = "";
 
     constructor(rows: number, columns: number) {

@@ -40,7 +40,6 @@ namespace TP_Solver.Models
             get { return Array.GetLength(1); }
         }
 
-        [JsonIgnore]
         public int[] U
         {
             get
@@ -52,7 +51,6 @@ namespace TP_Solver.Models
             }
         }
 
-        [JsonIgnore]
         public int[] V
         {
             get
@@ -181,7 +179,7 @@ namespace TP_Solver.Models
 
             var count = 0;
 
-            while ((_u.ToList().Any(x => x == null) || _v.ToList().Any(x => x == null)) && count < 20)
+            while ((_u.ToList().Any(x => x == null) || _v.ToList().Any(x => x == null)) && count < 200)
             {
                 for (var i = 0; i < Rows; i++)
                 {

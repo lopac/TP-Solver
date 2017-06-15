@@ -8,31 +8,68 @@ namespace TP_Solver.Helpers
     public static class TPSolver
     {
         /// <summary>
+        ///     Get Feasible solution using Least cost method
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <returns>List&lt;Matrix&gt;</returns>
+        public static List<Matrix> GetLeastCostFeasibleSolution(this Matrix matrix)
+        {
+            var solutionMatrices = new List<Matrix>();
+
+            while (matrix.Supplies.Any(x => x != 0) && matrix.Demands.Any(x => x != 0))
+            {
+                var orderedCells = matrix.Flatten().Where(x => x.State == State.NotAllocated).OrderBy(x => x.Value)
+                    .ToList();
+
+                var pickedCell = orderedCells[0];
+
+                foreach (var cell in orderedCells.Where(x => x.Value == orderedCells.First().Value))
+                {
+                    var coordinates = matrix.CoordinatesOf(cell);
+                    var cellAllocation = matrix.GetCellAllocation(coordinates.Row, coordinates.Column);
+
+                    var pickedCellCoordinates = matrix.CoordinatesOf(cell);
+                    var pickedCellAllocation = matrix.GetCellAllocation(pickedCellCoordinates.Row, pickedCellCoordinates.Column);
+
+                    if (cellAllocation > pickedCellAllocation)
+                    {
+                        pickedCell = cell;
+                    }
+                }
+
+                matrix.Allocate(matrix.CoordinatesOf(pickedCell).Row, matrix.CoordinatesOf(pickedCell).Column);
+                solutionMatrices.Add(matrix.GetCopy());
+            }
+
+            return solutionMatrices.ToList();
+        }
+
+        /// <summary>
         ///     Get Feasible solution using North West Corner Rule
         /// </summary>
         /// <param name="matrix"></param>
         /// <returns>List&lt;Matrix&gt;</returns>
-        //public static List<Matrix> GetFeasibleSolution(this Matrix matrix)
-        //{
-        //    var solutionMatrices = new List<Matrix>();
+        public static List<Matrix> GetNorthWestFeasibleSolution(this Matrix matrix)
+        {
+            var solutionMatrices = new List<Matrix>();
 
-        //    while (matrix.Supplies.Any(x => x != 0) && matrix.Demands.Any(x => x != 0))
-        //    {
-        //        for (var row = 0; row < matrix.Rows; row++)
-        //        {
-        //            for (var column = 0; column < matrix.Columns; column++)
-        //            {
-        //                if (matrix[row, column].State == State.NotAllocated)
-        //                {
-        //                    matrix.Allocate(row, column);
-        //                    solutionMatrices.Add(matrix.GetCopy());
-        //                }
-        //            }
-        //        }
-        //    }
+            while (matrix.Supplies.Any(x => x != 0) && matrix.Demands.Any(x => x != 0))
+            {
+                for (var row = 0; row < matrix.Rows; row++)
+                {
+                    for (var column = 0; column < matrix.Columns; column++)
+                    {
+                        if (matrix[row, column].State == State.NotAllocated)
+                        {
+                            matrix.Allocate(row, column);
+                            solutionMatrices.Add(matrix.GetCopy());
+                        }
+                    }
+                }
+            }
 
-        //    return solutionMatrices;
-        //}
+            return solutionMatrices.ToList();
+        }
 
 
         /// <summary>
@@ -40,7 +77,7 @@ namespace TP_Solver.Helpers
         /// </summary>
         /// <param name="matrix"></param>
         /// <returns>List&lt;Matrix&gt;</returns>
-        public static List<Matrix> GetFeasibleSolution(this Matrix matrix)
+        public static List<Matrix> GetVamFeasibleSolution(this Matrix matrix)
         {
             var solutionMatrices = new List<Matrix>();
 
@@ -128,9 +165,7 @@ namespace TP_Solver.Helpers
 
                     if (isRowChoosen)
                     {
-
                         var coordinates = matrix.CoordinatesOf(minRowCell ?? minColumnCell);
-
 
 
                         matrix.Allocate(coordinates.Row, coordinates.Column);
@@ -156,7 +191,6 @@ namespace TP_Solver.Helpers
                         }
                     }
                 }
-
             }
 
             return solutionMatrices;
@@ -166,39 +200,57 @@ namespace TP_Solver.Helpers
         ///     Get optimal solution using Modified distribution method
         /// </summary>
         /// <param name="matrix"></param>
+        /// <param name="originalMatrix"></param>
         /// <returns>List&lt;Matrix&gt;</returns>
-        public static Matrix GetOptimalSolution(this Matrix matrix)
+        public static List<Matrix> GetOptimalSolution(this Matrix matrix)
         {
+            var solutionMatrices = new List<Matrix>();
+
             //ako je m + n - 1 != broj alociranih onda popravi matricu
             if (matrix.Rows + matrix.Columns - 1 != matrix.Flatten().Count(x => x.State == State.Allocated))
             {
                 matrix.RemoveDegeneracy();
             }
 
+            solutionMatrices.Add(matrix.GetCopy());
+
             matrix.ComputeRelativeCosts();
+
+            solutionMatrices.Add(matrix.GetCopy());
+
 
             while (matrix.Flatten().Any(x => x.State == State.RelativeAllocated && x.Allocated > 0))
             {
                 if (((matrix.Rows + matrix.Columns) - 1) != matrix.Flatten().Count(x => x.State == State.Allocated))
                 {
                     matrix.RemoveDegeneracy();
+
+                    solutionMatrices.Add(matrix.GetCopy());
+
                 }
 
                 if (matrix.ReallocateFreight() == false)
                 {
-                    break;
+                    return null;
                 }
 
                 if (((matrix.Rows + matrix.Columns) - 1) != matrix.Flatten().Count(x => x.State == State.Allocated))
                 {
                     matrix.RemoveDegeneracy();
+
+                    solutionMatrices.Add(matrix.GetCopy());
+
                 }
 
                 matrix.ComputeRelativeCosts();
+
+                solutionMatrices.Add(matrix.GetCopy());
+
             }
 
-            return matrix;
+            return solutionMatrices;
         }
+
 
         private static bool ReallocateFreight(this Matrix matrix)
         {
@@ -284,8 +336,10 @@ namespace TP_Solver.Helpers
 
                 return true;
             }
-
-            return false;
+            else
+            {
+                return false;
+            }
         }
 
         private static void ComputeRelativeCosts(this Matrix matrix)
@@ -314,76 +368,77 @@ namespace TP_Solver.Helpers
 
         private static void RemoveDegeneracy(this Matrix matrix)
         {
-            //var connections = new List<int>[matrix.Columns];
+            var connections = new List<int>[matrix.Columns];
 
-            //for (var j = 0; j < matrix.Columns; j++)
-            //{
-            //    for (var i = 0; i < matrix.Rows; i++)
-            //    {
-            //        if (matrix[i, j].Allocated > 0)
-            //        {
-            //            if (connections[j] == null)
-            //            {
-            //                connections[j] = new List<int>();
-            //            }
+            for (var j = 0; j < matrix.Columns; j++)
+            {
+                for (var i = 0; i < matrix.Rows; i++)
+                {
+                    if (matrix[i, j].Allocated > 0)
+                    {
+                        if (connections[j] == null)
+                        {
+                            connections[j] = new List<int>();
+                        }
 
-            //            connections[j].Add(i);
-            //        }
-            //    }
-            //}
+                        connections[j].Add(i);
+                    }
+                }
+            }
 
-            //var connectedColumns = new List<int>();
+            var connectedColumns = new List<int>();
 
-            //for (var i = 0; i < connections.Length; i++)
-            //{
-            //    for (var j = i + 1; j < connections.Length; j++)
-            //    {
-            //        foreach (var value in connections[i])
-            //        {
-            //            if (connections[j].Contains(value))
-            //            {
-            //                if (connectedColumns.Contains(i) == false)
-            //                {
-            //                    connectedColumns.Add(i);
-            //                }
-            //                if (connectedColumns.Contains(j) == false)
-            //                {
-            //                    connectedColumns.Add(j);
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
+            for (var i = 0; i < connections.Length; i++)
+            {
+                for (var j = i + 1; j < connections.Length; j++)
+                {
+                    foreach (var value in connections[i])
+                    {
+                        if (connections[j].Contains(value))
+                        {
+                            if (connectedColumns.Contains(i) == false)
+                            {
+                                connectedColumns.Add(i);
+                            }
+                            if (connectedColumns.Contains(j) == false)
+                            {
+                                connectedColumns.Add(j);
+                            }
+                        }
+                    }
+                }
+            }
 
-            //var disconnectedColumn = -1;
+            var disconnectedColumn = -1;
 
-            //for (int i = 0; i < matrix.Columns; i++)
-            //{
-            //    if (connectedColumns.Contains(i) == false)
-            //    {
-            //        disconnectedColumn = i;
-            //        break;
-            //    }
-            //}
+            for (int i = 0; i < matrix.Columns; i++)
+            {
+                if (connectedColumns.Contains(i) == false)
+                {
+                    disconnectedColumn = i;
+                    break;
+                }
+            }
 
-            //if (disconnectedColumn != -1)
-            //{
-            //    for (var i = 0; i < matrix.Rows; i++)
-            //    {
-            //        var cell = matrix[i, disconnectedColumn];
-            //        if (cell.State == State.Processed)
-            //        {
-            //            cell.State = State.Allocated;
-            //            break;
-            //        }
-            //    }
-            //}
-            //else
-            //{
-                var cell = matrix.Flatten().Where(x => x.State != State.Allocated && x.Value != 0).OrderBy(x => x.Value).First();
+            if (disconnectedColumn != -1)
+            {
+                for (var i = 0; i < matrix.Rows; i++)
+                {
+                    var cell = matrix[i, disconnectedColumn];
+                    if (cell.State == State.Processed)
+                    {
+                        cell.State = State.Allocated;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                var cell = matrix.Flatten().Where(x => x.State != State.Allocated && x.Value != 0).OrderBy(x => x.Value)
+                    .First();
                 cell.Allocated = 0;
                 cell.State = State.Allocated;
-            //}
+            }
         }
     }
 }

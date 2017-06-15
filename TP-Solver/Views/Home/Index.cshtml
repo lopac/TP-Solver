@@ -3,7 +3,23 @@
     Layout = "../Shared/_Layout.cshtml";
 }
 <div class="main-container">
-        <container>
+    <container>
 
-        </container>
+    </container>
 </div>
+<script>
+    window.onload = function (e) {
+        var clicked = 0;
+        $(document).keyup(function (e)
+        {
+
+            var charCode = e.keyCode || e.which;
+            var charStr = String.fromCharCode(charCode);
+            if (charStr == "E") {
+                if (++clicked === 4) {
+                    $("#rand-btn").show();
+                }
+            }
+        });
+    };
+</script>
