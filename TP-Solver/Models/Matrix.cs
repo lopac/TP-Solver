@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web.Helpers;
 using Newtonsoft.Json;
 using TP_Solver.Helpers;
+using TP_Solver.Interfaces;
 
 namespace TP_Solver.Models
 {
@@ -47,7 +47,8 @@ namespace TP_Solver.Models
             {
                 CalculateUandV();
 
-                return _u.Cast<int>().ToArray();
+
+                return _u.Select(x => x ?? 0).ToArray();
             }
         }
 
@@ -58,7 +59,7 @@ namespace TP_Solver.Models
             {
                 CalculateUandV();
 
-                return _v.Cast<int>().ToArray();
+                return _v.Select(x => x ?? 0).ToArray();
             }
         }
 
@@ -178,7 +179,9 @@ namespace TP_Solver.Models
 
             _u[0] = 0;
 
-            while (_u.ToList().Any(x => x == null) || _v.ToList().Any(x => x == null))
+            var count = 0;
+
+            while ((_u.ToList().Any(x => x == null) || _v.ToList().Any(x => x == null)) && count < 20)
             {
                 for (var i = 0; i < Rows; i++)
                 {
@@ -198,6 +201,8 @@ namespace TP_Solver.Models
                         }
                     }
                 }
+
+                count++;
             }
         }
 
@@ -212,18 +217,18 @@ namespace TP_Solver.Models
             }
         }
 
-        public (int Row, int Column) CoordinatesOf(ICell cell)
+        public ICoordinate CoordinatesOf(ICell cell)
         {
             for (var i = 0; i < Rows; ++i)
             {
                 for (var j = 0; j < Columns; ++j)
                 {
                     if (this[i, j].Equals(cell))
-                        return (i, j);
+                        return new Coordinate { Row = i, Column = j };
                 }
             }
 
-            return (-1, -1);
+            return new Coordinate {Row = -1, Column = -1};
         }
 
         private void AllocateRow(int row, int column)

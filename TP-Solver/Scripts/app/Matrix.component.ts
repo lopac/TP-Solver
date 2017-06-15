@@ -1,12 +1,12 @@
-﻿import { Component, ComponentRef, ViewChild, ViewChildren, QueryList, ElementRef, ViewContainerRef,ComponentFactoryResolver } from "@angular/core";
+﻿import { Component, ComponentRef, ViewChild, ViewChildren, QueryList, ElementRef, ViewContainerRef,
+    ComponentFactoryResolver } from "@angular/core";
 import { Matrix } from "./Matrix.js";
 import { MatrixService } from "./MatrixService.js";
 import { CellComponent } from "./Cell.component.js";
 import { Cell } from "./Cell.js";
 import { ResultMatrixComponent } from "./ResultMatrix.component.js";
 
-interface IResult
-{
+interface IResult {
     InitialMatrix: Matrix;
     ModiOptimalMatrix: Matrix;
     VamStepsMatrices: Array<Matrix>;
@@ -15,29 +15,28 @@ interface IResult
 @Component({
     selector: "matrix",
     template: `
-        <div #matrix class="matrix">
+<div #matrix class="matrix">
             <div class="matrix">
-            <div class="column" >
-                <p *ngFor="let s of rows" class="{{s.Class}}"  >{{s.value}}</p>
-            </div>
+                <div class="column">
+                    <p *ngFor="let s of rows" class="{{s.Class}}">{{s.value}}</p>
+                </div>
 
-            <div class="column" *ngFor="let col of columns">
-                <p class="mhead text-center">{{col.Value}}</p>
-                <cell *ngFor="let row of cells" #cell row="{{row.id}}" col="{{col.id}}"  class="{{row.Class}} {{col.Class}}" ></cell>
-            </div>
+                <div class="column" *ngFor="let col of columns">
+                    <p class="mhead text-center">{{col.Value}}</p>
+                    <cell *ngFor="let row of cells" #cell row="{{row.id}}" col="{{col.id}}" class="{{row.Class}} {{col.Class}}"></cell>
+                </div>
             </div>
             <button (click)="calculate()" class="btn btn-primary btn-block btn-lg">Izračunaj</button>
             <button (click)="setCellsValueToRandom()" class="btn btn-info btn-block btn-lg">Nasumični brojevi</button>
             <button (click)="reset()" class="btn btn-default btn-block btn-lg">Resetiraj</button>
         </div>
 
-        <p #resultTitle class="title" style="max-width: 600px;display: block; word-wrap: break-word;"></p>
-        <p #result></p>
-        <p #resultStepsTitle class="title"></p>
+<p #resultTitle class="title" style="max-width: 600px;display: block; word-wrap: break-word;"></p>
+<p #result></p>
+<p #resultStepsTitle class="title"></p>
 
 `
 })
-
 export class MatrixComponent {
 
     public columns: Array<any> = [];
@@ -94,7 +93,7 @@ export class MatrixComponent {
     {
         for (let cell of this.cellsArray.toArray())
         {
-            cell.value = Math.floor((Math.random() * 10) + 1);
+            cell.value = Math.floor((Math.random() * 80) + 1);
         }
     }
 
@@ -152,25 +151,25 @@ export class MatrixComponent {
             },
             error: e =>
             {
-                console.log(e.responseJSON);
+                console.log(e);
             }
         });
     }
 
     private showResult(result: IResult)
     {
-
         for (let matrix of this.resultMatrices)
         {
             matrix.destroy();
         }
 
-        this.resultTitle.nativeElement.innerHTML = "Result:";
-        this.resultView.nativeElement.innerHTML = result.VamStepsMatrices[result.VamStepsMatrices.length - 1].ResultFunction;
+        this.resultTitle.nativeElement.innerHTML = "Rezultat:";
+        this.resultView.nativeElement.innerHTML = result.VamStepsMatrices[result.VamStepsMatrices.length - 1]
+            .ResultFunction;
 
         if (result.VamStepsMatrices.length > 0)
         {
-            this.resultStepsTitle.nativeElement.innerHTML = "Steps:";
+            this.resultStepsTitle.nativeElement.innerHTML = "Koraci: ";
 
 
             for (let resultMatrix of result.VamStepsMatrices)
@@ -180,6 +179,15 @@ export class MatrixComponent {
                 this.resultMatrices.push(component);
                 component.instance.setResultMatrix(resultMatrix);
             }
+
+
+            this.resultTitle.nativeElement.innerHTML = "Rezultat:";
+            this.resultView.nativeElement.innerHTML = result.ModiOptimalMatrix.ResultFunction;
+
+            const factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrixComponent);
+            const component = this.target.createComponent(factory);
+            this.resultMatrices.push(component);
+            component.instance.setResultMatrix(result.ModiOptimalMatrix);
         }
     }
 

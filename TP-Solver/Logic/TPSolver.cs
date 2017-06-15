@@ -314,76 +314,76 @@ namespace TP_Solver.Helpers
 
         private static void RemoveDegeneracy(this Matrix matrix)
         {
-            var connections = new List<int>[matrix.Columns];
+            //var connections = new List<int>[matrix.Columns];
 
-            for (var j = 0; j < matrix.Columns; j++)
-            {
-                for (var i = 0; i < matrix.Rows; i++)
-                {
-                    if (matrix[i, j].Allocated > 0)
-                    {
-                        if (connections[j] == null)
-                        {
-                            connections[j] = new List<int>();
-                        }
+            //for (var j = 0; j < matrix.Columns; j++)
+            //{
+            //    for (var i = 0; i < matrix.Rows; i++)
+            //    {
+            //        if (matrix[i, j].Allocated > 0)
+            //        {
+            //            if (connections[j] == null)
+            //            {
+            //                connections[j] = new List<int>();
+            //            }
 
-                        connections[j].Add(i);
-                    }
-                }
-            }
+            //            connections[j].Add(i);
+            //        }
+            //    }
+            //}
 
-            var connectedColumns = new List<int>();
+            //var connectedColumns = new List<int>();
 
-            for (var i = 0; i < connections.Length; i++)
-            {
-                for (var j = i + 1; j < connections.Length; j++)
-                {
-                    foreach (var value in connections[i])
-                    {
-                        if (connections[j].Contains(value))
-                        {
-                            if (connectedColumns.Contains(i) == false)
-                            {
-                                connectedColumns.Add(i);
-                            }
-                            if (connectedColumns.Contains(j) == false)
-                            {
-                                connectedColumns.Add(j);
-                            }
-                        }
-                    }
-                }
-            }
+            //for (var i = 0; i < connections.Length; i++)
+            //{
+            //    for (var j = i + 1; j < connections.Length; j++)
+            //    {
+            //        foreach (var value in connections[i])
+            //        {
+            //            if (connections[j].Contains(value))
+            //            {
+            //                if (connectedColumns.Contains(i) == false)
+            //                {
+            //                    connectedColumns.Add(i);
+            //                }
+            //                if (connectedColumns.Contains(j) == false)
+            //                {
+            //                    connectedColumns.Add(j);
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
 
-            var disconnectedColumn = -1;
+            //var disconnectedColumn = -1;
 
-            for (int i = 0; i < matrix.Columns; i++)
-            {
-                if (connectedColumns.Contains(i) == false)
-                {
-                    disconnectedColumn = i;
-                    break;
-                }
-            }
+            //for (int i = 0; i < matrix.Columns; i++)
+            //{
+            //    if (connectedColumns.Contains(i) == false)
+            //    {
+            //        disconnectedColumn = i;
+            //        break;
+            //    }
+            //}
 
-            if (disconnectedColumn != -1)
-            {
-                for (var i = 0; i < matrix.Rows; i++)
-                {
-                    var cell = matrix[i, disconnectedColumn];
-                    if (cell.State == State.Processed)
-                    {
-                        cell.State = State.Allocated;
-                        break;
-                    }
-                }
-            }
-            else
-            {
+            //if (disconnectedColumn != -1)
+            //{
+            //    for (var i = 0; i < matrix.Rows; i++)
+            //    {
+            //        var cell = matrix[i, disconnectedColumn];
+            //        if (cell.State == State.Processed)
+            //        {
+            //            cell.State = State.Allocated;
+            //            break;
+            //        }
+            //    }
+            //}
+            //else
+            //{
                 var cell = matrix.Flatten().Where(x => x.State != State.Allocated && x.Value != 0).OrderBy(x => x.Value).First();
                 cell.Allocated = 0;
                 cell.State = State.Allocated;
-            }
+            //}
         }
     }
 }

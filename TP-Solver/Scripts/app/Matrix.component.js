@@ -44,7 +44,7 @@ var MatrixComponent = (function () {
     MatrixComponent.prototype.setCellsValueToRandom = function () {
         for (var _i = 0, _a = this.cellsArray.toArray(); _i < _a.length; _i++) {
             var cell = _a[_i];
-            cell.value = Math.floor((Math.random() * 10) + 1);
+            cell.value = Math.floor((Math.random() * 80) + 1);
         }
     };
     MatrixComponent.prototype.buildMatrix = function () {
@@ -81,7 +81,7 @@ var MatrixComponent = (function () {
                 _this.showResult(data);
             },
             error: function (e) {
-                console.log(e.responseJSON);
+                console.log(e);
             }
         });
     };
@@ -90,17 +90,24 @@ var MatrixComponent = (function () {
             var matrix = _a[_i];
             matrix.destroy();
         }
-        this.resultTitle.nativeElement.innerHTML = "Result:";
-        this.resultView.nativeElement.innerHTML = result.VamStepsMatrices[result.VamStepsMatrices.length - 1].ResultFunction;
+        this.resultTitle.nativeElement.innerHTML = "Rezultat:";
+        this.resultView.nativeElement.innerHTML = result.VamStepsMatrices[result.VamStepsMatrices.length - 1]
+            .ResultFunction;
         if (result.VamStepsMatrices.length > 0) {
-            this.resultStepsTitle.nativeElement.innerHTML = "Steps:";
+            this.resultStepsTitle.nativeElement.innerHTML = "Koraci: ";
             for (var _b = 0, _c = result.VamStepsMatrices; _b < _c.length; _b++) {
                 var resultMatrix = _c[_b];
-                var factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrix_component_js_1.ResultMatrixComponent);
-                var component = this.target.createComponent(factory);
-                this.resultMatrices.push(component);
-                component.instance.setResultMatrix(resultMatrix);
+                var factory_1 = this.componentFactoryResolver.resolveComponentFactory(ResultMatrix_component_js_1.ResultMatrixComponent);
+                var component_1 = this.target.createComponent(factory_1);
+                this.resultMatrices.push(component_1);
+                component_1.instance.setResultMatrix(resultMatrix);
             }
+            this.resultTitle.nativeElement.innerHTML = "Rezultat:";
+            this.resultView.nativeElement.innerHTML = result.ModiOptimalMatrix.ResultFunction;
+            var factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrix_component_js_1.ResultMatrixComponent);
+            var component = this.target.createComponent(factory);
+            this.resultMatrices.push(component);
+            component.instance.setResultMatrix(result.ModiOptimalMatrix);
         }
     };
     MatrixComponent.prototype.reset = function () {
@@ -137,7 +144,7 @@ __decorate([
 MatrixComponent = __decorate([
     core_1.Component({
         selector: "matrix",
-        template: "\n        <div #matrix class=\"matrix\">\n            <div class=\"matrix\">\n            <div class=\"column\" >\n                <p *ngFor=\"let s of rows\" class=\"{{s.Class}}\"  >{{s.value}}</p>\n            </div>\n\n            <div class=\"column\" *ngFor=\"let col of columns\">\n                <p class=\"mhead text-center\">{{col.Value}}</p>\n                <cell *ngFor=\"let row of cells\" #cell row=\"{{row.id}}\" col=\"{{col.id}}\"  class=\"{{row.Class}} {{col.Class}}\" ></cell>\n            </div>\n            </div>\n            <button (click)=\"calculate()\" class=\"btn btn-primary btn-block btn-lg\">Izra\u010Dunaj</button>\n            <button (click)=\"setCellsValueToRandom()\" class=\"btn btn-info btn-block btn-lg\">Nasumi\u010Dni brojevi</button>\n            <button (click)=\"reset()\" class=\"btn btn-default btn-block btn-lg\">Resetiraj</button>\n        </div>\n\n        <p #resultTitle class=\"title\" style=\"max-width: 600px;display: block; word-wrap: break-word;\"></p>\n        <p #result></p>\n        <p #resultStepsTitle class=\"title\"></p>\n\n"
+        template: "\n<div #matrix class=\"matrix\">\n            <div class=\"matrix\">\n                <div class=\"column\">\n                    <p *ngFor=\"let s of rows\" class=\"{{s.Class}}\">{{s.value}}</p>\n                </div>\n\n                <div class=\"column\" *ngFor=\"let col of columns\">\n                    <p class=\"mhead text-center\">{{col.Value}}</p>\n                    <cell *ngFor=\"let row of cells\" #cell row=\"{{row.id}}\" col=\"{{col.id}}\" class=\"{{row.Class}} {{col.Class}}\"></cell>\n                </div>\n            </div>\n            <button (click)=\"calculate()\" class=\"btn btn-primary btn-block btn-lg\">Izra\u010Dunaj</button>\n            <button (click)=\"setCellsValueToRandom()\" class=\"btn btn-info btn-block btn-lg\">Nasumi\u010Dni brojevi</button>\n            <button (click)=\"reset()\" class=\"btn btn-default btn-block btn-lg\">Resetiraj</button>\n        </div>\n\n<p #resultTitle class=\"title\" style=\"max-width: 600px;display: block; word-wrap: break-word;\"></p>\n<p #result></p>\n<p #resultStepsTitle class=\"title\"></p>\n\n"
     }),
     __metadata("design:paramtypes", [MatrixService_js_1.MatrixService,
         core_1.ViewContainerRef,

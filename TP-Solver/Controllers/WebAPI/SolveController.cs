@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
-using System.Web.Http.Results;
-using System.Web.Mvc;
-using Newtonsoft.Json;
 using TP_Solver.Helpers;
 using TP_Solver.Models;
 
@@ -22,7 +18,6 @@ namespace TP_Solver.Controllers.WebAPI
         {
             Supplies = new List<int>();
             Demands = new List<int>();
-            //Array = new  [];
         }
 
         public Matrix ToMatrix()
@@ -71,7 +66,6 @@ namespace TP_Solver.Controllers.WebAPI
     }
     public class SolveController : ApiController
     {
-        [System.Web.Http.HttpPost, System.Web.Http.Route("api/Solve")]
         public IHttpActionResult Solve(MatrixViewModel matrixViewModel)
         {
             var matrix = matrixViewModel.ToMatrix();
@@ -80,7 +74,7 @@ namespace TP_Solver.Controllers.WebAPI
 
             var feasibleMatrices = matrix.GetFeasibleSolution();
 
-            var optimalMatrix = feasibleMatrices.Last().GetOptimalSolution();
+            var optimalMatrix = feasibleMatrices.Last().GetCopy().GetOptimalSolution();
 
             return Ok(new ResultViewModel
             {
