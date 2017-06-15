@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Results;
+using System.Web.Mvc;
+using Newtonsoft.Json;
 using TP_Solver.Helpers;
 using TP_Solver.Models;
 
@@ -11,150 +14,152 @@ namespace TP_Solver.Controllers.WebAPI
     {
         public int Rows { get; set; }
         public int Columns { get; set; }
-        public double[][] Matrix { get; set; }
-        public double[] Supplies { get; set; }
-        public double[] Demands { get; set; }
-    }
+        public Cell[][] Array { get; set; }
+        public List<int> Supplies { get; set; }
+        public List<int> Demands { get; set; }
 
-    public class ResultMatrixViewModel
-    {
-        public int Rows { get; set; }
-        public int Columns { get; set; }
-        public Cell[][] Matrix { get; set; }
-        public double[] Supplies { get; set; }
-        public double[] Demands { get; set; }
-    }
-
-    public class SolveController : ApiController
-    {
-        private Matrix GetMatrixFromViewModel(MatrixViewModel matrixView)
+        public MatrixViewModel()
         {
-            Matrix matrix;
+            Supplies = new List<int>();
+            Demands = new List<int>();
+            //Array = new  [];
+        }
 
-            if (matrixView.Demands.Sum() > matrixView.Supplies.Sum())
+        public Matrix ToMatrix()
+        {
+            if (Demands.Sum() > Supplies.Sum())
             {
-                matrix = new Matrix(matrixView.Rows + 1, matrixView.Columns)
-                {
-                    Demands = matrixView.Demands,
-                };
+                var difference = Demands.Sum() - Supplies.Sum();
 
-
-                var diff = matrixView.Demands.Sum() - matrixView.Supplies.Sum();
-
-
-                for (int i = 0; i < matrix.Supplies.Length; i++)
-                {
-                    if (i != matrix.Supplies.Length - 1)
-                    {
-                        matrix.Supplies[i] = matrixView.Supplies[i];
-                    }
-                    else
-                    {
-                        matrix.Supplies[i] = diff;
-                    }
-                }
-
+                Supplies.Add(difference);
             }
-            else if (matrixView.Supplies.Sum() > matrixView.Demands.Sum())
+            else if (Supplies.Sum() > Demands.Sum())
             {
-                matrix = new Matrix(matrixView.Rows, matrixView.Columns + 1)
-                {
-                    Supplies = matrixView.Supplies
-                };
+                var difference = Supplies.Sum() - Demands.Sum();
 
-                var diff = matrixView.Supplies.Sum() - matrixView.Demands.Sum();
-
-                for (int i = 0; i < matrix.Demands.Length; i++)
-                {
-                    if (i != matrix.Demands.Length - 1)
-                    {
-                        matrix.Demands[i] = matrixView.Demands[i];
-                    }
-                    else
-                    {
-                        matrix.Demands[i] = diff;
-                    }
-                }
-            }
-            else
-            {
-                matrix = new Matrix(matrixView.Rows, matrixView.Columns)
-                {
-                    Demands = matrixView.Demands,
-                    Supplies = matrixView.Supplies
-                };
+                Demands.Add(difference);
             }
 
-            for (int i = 0; i < matrixView.Rows; i++)
+
+            var newMatrix = new Matrix(Supplies.Count, Demands.Count)
             {
-                for (int j = 0; j < matrixView.Columns; j++)
+                Demands = Demands.ToArray(),
+                Supplies = Supplies.ToArray()
+            };
+
+            for (int i = 0; i < Rows; i++)
+            {
+                for (int j = 0; j < Columns; j++)
                 {
-                    matrix[i, j] = new Cell
+                    newMatrix[i, j] = new Cell
                     {
-                        Value = matrixView.Matrix[i][j]
+                        Value = Array[i][j].Value,
+                        State = State.NotAllocated
                     };
                 }
             }
 
-            return matrix;
+            return newMatrix;
         }
+    }
 
-        private ResultMatrixViewModel GetResultViewModelFromMatrix(Matrix matrix)
+    public class ResultViewModel
+    {
+        public Matrix InitialMatrix { get; set; }
+        public Matrix ModiOptimalMatrix { get; set; }
+        public IEnumerable<Matrix> VamStepsMatrices { get; set; }
+    }
+    public class SolveController : ApiController
+    {
+        [System.Web.Http.HttpPost, System.Web.Http.Route("api/Solve")]
+        public IHttpActionResult Solve(MatrixViewModel matrixViewModel)
         {
-            var resultMatrix = new ResultMatrixViewModel
-            {
-                Rows = matrix.GetLength(0),
-                Columns = matrix.GetLength(1),
-                Demands = matrix.Demands,
-                Supplies = matrix.Supplies,
-                Matrix = new Cell[matrix.GetLength(0)][]
-            };
+            var matrix = matrixViewModel.ToMatrix();
 
-            for (int i = 0; i < resultMatrix.Rows; i++)
-            {
-                resultMatrix.Matrix[i] = new Cell[resultMatrix.Columns];
-
-                for (int j = 0; j < resultMatrix.Columns; j++)
-                {
-                    resultMatrix.Matrix[i][j] = matrix[i, j];
-                }
-            }
-
-            return resultMatrix;
-        }
-
-
-        [HttpPost, Route("api/Solve/NorthWest")]
-        public IHttpActionResult NorthWest(MatrixViewModel matrixView)
-        {
-            var solver = new TransportationModelSolver();
-
-
-            var matrix = GetMatrixFromViewModel(matrixView);
             var builtMatrix = matrix.GetCopy();
 
-            var resultMatrices = solver.SolveNorthWest(matrix);
+            var feasibleMatrices = matrix.GetFeasibleSolution();
 
+            var optimalMatrix = feasibleMatrices.Last().GetOptimalSolution();
 
-            var matrices = new List<ResultMatrixViewModel> {GetResultViewModelFromMatrix(builtMatrix)};
-
-
-            resultMatrices.ForEach(x => matrices.Add(GetResultViewModelFromMatrix(x)));
-
-
-            var result = new
+            return Ok(new ResultViewModel
             {
-                matrices,
-                resultFunction = resultMatrices.Last().ResultFunction
-            };
-
-            return Ok(result);
-        }
-
-        [HttpPost, Route("api/Solve/LeastCost")]
-        public IHttpActionResult LeastCost(MatrixViewModel matrixView)
-        {
-            return Ok();
+                InitialMatrix = builtMatrix,
+                VamStepsMatrices = feasibleMatrices,
+                ModiOptimalMatrix = optimalMatrix
+            });
         }
     }
 }
+
+
+//var optimalSolution = new Matrix(3, 5)
+//{
+//    [0, 0] = new Cell() { Value = 2, Allocated = 0 },
+//    [1, 0] = new Cell() { Value = 3, Allocated = 5 },
+//    [2, 0] = new Cell() { Value = 4, Allocated = 3 },
+//    [0, 1] = new Cell() { Value = 3, Allocated = 0 },
+//    [1, 1] = new Cell() { Value = 2, Allocated = 0 },
+//    [2, 1] = new Cell() { Value = 1, Allocated = 10 },
+//    [0, 2] = new Cell() { Value = 4, Allocated = 0 },
+//    [1, 2] = new Cell() { Value = 5, Allocated = 0 },
+//    [2, 2] = new Cell() { Value = 2, Allocated = 12 },
+//    [0, 3] = new Cell() { Value = 5, Allocated = 0 },
+//    [1, 3] = new Cell() { Value = 2, Allocated = 15 },
+//    [2, 3] = new Cell() { Value = 3, Allocated = 0 },
+//    [0, 4] = new Cell() { Value = 0, Allocated = 15 },
+//    [1, 4] = new Cell() { Value = 0, Allocated = 0 },
+//    [2, 4] = new Cell() { Value = 0, Allocated = 0 },
+//}.GetOptimalSolution();
+
+//var optimalSolution = new Matrix(3, 5)
+//{
+//    [0, 0] = new Cell() { Value = 0, Allocated = 15 },
+//    [1, 0] = new Cell() { Value = 0, Allocated = 0 },
+//    [2, 0] = new Cell() { Value = 0, Allocated = 0 },
+//    [0, 1] = new Cell() { Value = 3, Allocated = 0 },
+//    [1, 1] = new Cell() { Value = 2, Allocated = 0 },
+//    [2, 1] = new Cell() { Value = 1, Allocated = 10 },
+//    [0, 2] = new Cell() { Value = 4, Allocated = 0 },
+//    [1, 2] = new Cell() { Value = 5, Allocated = 0 },
+//    [2, 2] = new Cell() { Value = 2, Allocated = 12 },
+//    [0, 3] = new Cell() { Value = 5, Allocated = 0 },
+//    [1, 3] = new Cell() { Value = 2, Allocated = 15 },
+//    [2, 3] = new Cell() { Value = 3, Allocated = 0 },
+//    [0, 4] = new Cell() { Value = 2, Allocated = 0 },
+//    [1, 4] = new Cell() { Value = 3, Allocated = 5 },
+//    [2, 4] = new Cell() { Value = 4, Allocated = 3 },
+
+//}.GetOptimalSolution();
+//var optimalSolution = new Matrix(3, 4)
+//{
+//    [0, 0] = new Cell() { Value = 19, Allocated = 5, State = State.Allocated },
+//    [1, 0] = new Cell() { Value = 70 },
+//    [2, 0] = new Cell() { Value = 40 },
+//    [0, 1] = new Cell() { Value = 30 },
+//    [1, 1] = new Cell() { Value = 30 },
+//    [2, 1] = new Cell() { Value = 8, Allocated = 8, State = State.Allocated },
+//    [0, 2] = new Cell() { Value = 50 },
+//    [1, 2] = new Cell() { Value = 40, Allocated = 7, State = State.Allocated },
+//    [2, 2] = new Cell() { Value = 70 },
+//    [0, 3] = new Cell() { Value = 10, Allocated = 2, State = State.Allocated },
+//    [1, 3] = new Cell() { Value = 60, Allocated = 2, State = State.Allocated },
+//    [2, 3] = new Cell() { Value = 20, Allocated = 10, State = State.Allocated },
+//}.GetOptimalSolution();
+
+
+//var optimalSolution = new Matrix(3, 4)
+//{
+//    [0, 0] = new Cell() { Value = 2, Allocated = 50, State = State.Allocated },
+//    [1, 0] = new Cell() { Value = 1 },
+//    [2, 0] = new Cell() { Value = 3 },
+//    [0, 1] = new Cell() { Value = 5, Allocated = 0, State = State.Allocated },
+//    [1, 1] = new Cell() { Value = 2, Allocated = 20, State = State.Allocated },
+//    [2, 1] = new Cell() { Value = 1, Allocated = 20, State = State.Allocated },
+//    [0, 2] = new Cell() { Value = 4 },
+//    [1, 2] = new Cell() { Value = 1, Allocated = 70, State = State.Allocated },
+//    [2, 2] = new Cell() { Value = 5 },
+//    [0, 3] = new Cell() { Value = 5 },
+//    [1, 3] = new Cell() { Value = 4 },
+//    [2, 3] = new Cell() { Value = 2, Allocated = 40, State = State.Allocated },
+//}.GetOptimalSolution();

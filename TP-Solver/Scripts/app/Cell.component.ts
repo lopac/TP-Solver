@@ -18,7 +18,7 @@ export class CellComponent implements AfterViewInit
     col: number = -1;
 
 
-    get value(): number { return $(this.element.nativeElement).find("input").val(); }
+    get value(): number { return Number($(this.element.nativeElement).find("input").val()); }
 
     set value(value: number)
     {

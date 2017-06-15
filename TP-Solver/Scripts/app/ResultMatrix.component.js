@@ -9,15 +9,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require("@angular/core");
+var Cell_js_1 = require("./Cell.js");
 var ResultMatrixComponent = (function () {
     function ResultMatrixComponent(viewContainerRef, componentFactoryResolver) {
-        this.viewContainerRef = viewContainerRef;
         this.componentFactoryResolver = componentFactoryResolver;
+        this.viewContainerRef = viewContainerRef;
     }
     ResultMatrixComponent.prototype.setResultMatrix = function (value) {
         var header = "<div class=\"result-header\">";
-        for (var i_1 = 0; i_1 < value.Columns; i_1++) {
-            header += "<p class=\"mhead pull-left\">D " + (i_1 + 1) + "</p>";
+        for (var i = 0; i < value.Columns; i++) {
+            header += "<p class=\"mhead pull-left\">D " + (i + 1) + "</p>";
         }
         header += "<p class=\"mhead pull-left\">S</p>";
         this.matrixContainer.nativeElement.innerHTML += header + "</div>";
@@ -30,14 +31,17 @@ var ResultMatrixComponent = (function () {
                 row += "<p class=\"mhead pull-left\" style=\"margin-right: 5px;\">S" + (i + 1) + "</p>";
             }
             for (var j = 0; j < value.Columns; j++) {
-                if (value.Matrix[i][j].Allocated == -1) {
-                    row += "<div class=\"result-cell pull-left\"><span>" + value.Matrix[i][j].Value + "</span></div>";
+                if (value.Array[i][j].State === Cell_js_1.State.NotAllocated) {
+                    row += "<div class=\"result-cell pull-left\"><span>" + value.Array[i][j].Value + "</span></div>";
                 }
-                else if (value.Matrix[i][j].Allocated == 0) {
-                    row += "<div class=\"result-cell pull-left crossed\"><span>" + value.Matrix[i][j].Value + "</span></div>";
+                else if (value.Array[i][j].State === Cell_js_1.State.Processed) {
+                    row += "<div class=\"result-cell pull-left crossed\"><span>" + value.Array[i][j].Value + "</span></div>";
+                }
+                else if (value.Array[i][j].State === Cell_js_1.State.Allocated) {
+                    row += "<div class=\"result-cell pull-left allocated\"><span>" + value.Array[i][j].Allocated + "</span><strong> / </strong><span>" + value.Array[i][j].Value + "</span></div>";
                 }
                 else {
-                    row += "<div class=\"result-cell pull-left allocated\"><span>" + value.Matrix[i][j].Allocated + "</span><strong> / </strong><span>" + value.Matrix[i][j].Value + "</span></div>";
+                    row += "<div class=\"result-cell pull-left relative-allocated\"><span>" + value.Array[i][j].Allocated + "</span><strong> / </strong><span>" + value.Array[i][j].Value + "</span></div>";
                 }
             }
             row += "<div class=\"result-cell pull-left supply\"><span>" + value.Supplies[i] + "<span></div>";
@@ -45,8 +49,8 @@ var ResultMatrixComponent = (function () {
         }
         var demandsRow = "<div class=\"result-row\">";
         demandsRow += "<p class=\"mhead pull-left\">D </p>";
-        for (var i_2 = 0; i_2 < value.Columns; i_2++) {
-            demandsRow += "<div class=\"result-cell pull-left demand\"><span>" + value.Demands[i_2] + "<span></div>";
+        for (var i = 0; i < value.Columns; i++) {
+            demandsRow += "<div class=\"result-cell pull-left demand\"><span>" + value.Demands[i] + "<span></div>";
         }
         this.matrixContainer.nativeElement.innerHTML += demandsRow + "</div>";
         var maxWidth = 0;
@@ -56,8 +60,8 @@ var ResultMatrixComponent = (function () {
                 maxWidth = width;
             }
         });
-        $(this.matrixContainer.nativeElement).find(".result-cell").toArray().forEach(function (e) { return $(e).css("min-width", maxWidth); });
-        $(this.matrixContainer.nativeElement).find(".result-header .mhead").toArray().forEach(function (e) { return $(e).css("width", maxWidth); });
+        $(".result-matrix").find(".result-cell").toArray().forEach(function (e) { return $(e).css("min-width", maxWidth); });
+        $(".result-matrix").find(".result-header .mhead").toArray().forEach(function (e) { return $(e).css("width", maxWidth); });
     };
     return ResultMatrixComponent;
 }());

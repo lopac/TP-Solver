@@ -11,7 +11,7 @@ import { MatrixSize } from "./MatrixService.js";
     template: `
 
         <div class="buttons row text-center" style="margin: 0;">
-            <p class="lead col-md-3 col-md-offset-2 col-sm-4 col-sm-offset-2 col-xs-4 col-xs-offset-2 text-center">Rows</p>
+            <p class="lead col-md-3 col-md-offset-2 col-sm-4 col-sm-offset-2 col-xs-4 col-xs-offset-2 text-center">Ishodišta</p>
 
             <button class="btn btn-default col-md-2 col-sm-2 col-xs-2" (click)="decrementRows()"><span class="glyphicon glyphicon-minus"></span></button>
             <p class="col-md-1 col-sm-1 col-xs-1">{{rows - 1}}</p>
@@ -19,7 +19,7 @@ import { MatrixSize } from "./MatrixService.js";
         </div>
 
         <div class="buttons row text-center" style="margin: 0;">
-            <p class="lead col-md-3 col-md-offset-2  col-sm-4  col-sm-offset-2 col-xs-4  col-xs-offset-2 text-center">Columns</p>
+            <p class="lead col-md-3 col-md-offset-2  col-sm-4  col-sm-offset-2 col-xs-4  col-xs-offset-2 text-center">Odredišta</p>
 
             <button class="btn btn-default col-md-2  col-sm-2 col-xs-2" (click)="decrementCols()"><span class="glyphicon glyphicon-minus"></span></button>
             <p class="col-md-1 col-sm-1 col-xs-1">{{columns - 1}}</p>

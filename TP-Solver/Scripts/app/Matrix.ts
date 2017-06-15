@@ -1,17 +1,23 @@
-﻿export class Matrix {
-    public rows = 0;
-    public columns = 0;
+﻿import {Cell} from './Cell.js';
 
-    public matrix: Array<Array<number>> = [];
-    public supplies: Array<number> = [];
-    public demands: Array<number> = [];
+export class Matrix {
+    public Rows = 0;
+    public Columns = 0;
+
+    public Array: Array<Array<Cell>>;
+    public Supplies: Array<number> = [];
+    public Demands: Array<number> = [];
+
+    public ResultFunction: string = "";
 
     constructor(rows: number, columns: number) {
-        this.rows = rows;
-        this.columns = columns;
+        this.Rows = rows;
+        this.Columns = columns;
+
+        this.Array = new Array(this.Rows);
 
         for (let i = 0; i < rows; i++) {
-            this.matrix[i] = [];
+            this.Array[i] = Array(this.Columns);
         }
     }
 

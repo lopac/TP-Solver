@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require("@angular/core");
 var Matrix_js_1 = require("./Matrix.js");
 var MatrixService_js_1 = require("./MatrixService.js");
+var Cell_js_1 = require("./Cell.js");
 var ResultMatrix_component_js_1 = require("./ResultMatrix.component.js");
 var MatrixComponent = (function () {
     function MatrixComponent(matrixService, target, componentFactoryResolver) {
@@ -28,33 +29,40 @@ var MatrixComponent = (function () {
         this._cols = this.matrixService.matrixSize.columns;
         for (var i = 0; i < this._cols; i++) {
             this.columns.push(i === this._cols - 1
-                ? { Class: "finalColumn", Value: "S", id: i }
-                : { Class: "", Value: "D " + (i + 1), id: i });
+                ? { Class: "finalColumn", Value: "I", id: i }
+                : { Class: "", Value: "O " + (i + 1), id: i });
         }
         for (var i = 0; i < this._rows; i++) {
             this.cells.push(i === this._rows - 1
                 ? { Class: "finalRow", id: i }
                 : { Class: "", id: i });
             this.rows.push(i !== this._rows - 1
-                ? { Class: "mhead", value: "S " + (i + 1) }
-                : { Class: "mhead last", value: "D" });
+                ? { Class: "mhead", value: "I " + (i + 1) }
+                : { Class: "mhead last", value: "O" });
         }
     }
+    MatrixComponent.prototype.setCellsValueToRandom = function () {
+        for (var _i = 0, _a = this.cellsArray.toArray(); _i < _a.length; _i++) {
+            var cell = _a[_i];
+            cell.value = Math.floor((Math.random() * 10) + 1);
+        }
+    };
     MatrixComponent.prototype.buildMatrix = function () {
         var matrix = new Matrix_js_1.Matrix(this._rows - 1, this._cols - 1);
         for (var _i = 0, _a = this.cellsArray.toArray(); _i < _a.length; _i++) {
             var cell = _a[_i];
             var row = Number(cell.row);
             var col = Number(cell.col);
-            var value = cell.value;
-            if (row === matrix.rows && col !== matrix.columns) {
-                matrix.demands.push(value);
+            var value = Number(cell.value);
+            if (row === matrix.Rows && col !== matrix.Columns) {
+                matrix.Demands.push(value);
             }
-            else if (col === matrix.columns && row !== matrix.rows) {
-                matrix.supplies.push(value);
+            else if (col === matrix.Columns && row !== matrix.Rows) {
+                matrix.Supplies.push(value);
             }
-            else if (row !== matrix.rows && col !== matrix.columns) {
-                matrix.matrix[row][col] = value;
+            else if (row !== matrix.Rows && col !== matrix.Columns) {
+                matrix.Array[row][col] = new Cell_js_1.Cell();
+                matrix.Array[row][Number(col)].Value = value;
             }
         }
         return matrix;
@@ -62,8 +70,20 @@ var MatrixComponent = (function () {
     MatrixComponent.prototype.calculate = function () {
         var _this = this;
         var matrix = this.buildMatrix();
-        console.log(this.buildMatrix());
-        $.post("/api/Solve/NorthWest", matrix, function (data) { return _this.showResult(data); }).fail(function (f) { return alert(f.responseJSON.ExceptionMessage); });
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify(matrix),
+            url: "api/Solve",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                _this.showResult(data);
+            },
+            error: function (e) {
+                console.log(e.responseJSON);
+            }
+        });
     };
     MatrixComponent.prototype.showResult = function (result) {
         for (var _i = 0, _a = this.resultMatrices; _i < _a.length; _i++) {
@@ -71,10 +91,10 @@ var MatrixComponent = (function () {
             matrix.destroy();
         }
         this.resultTitle.nativeElement.innerHTML = "Result:";
-        this.resultView.nativeElement.innerHTML = result.resultFunction;
-        if (result.matrices.length > 0) {
+        this.resultView.nativeElement.innerHTML = result.VamStepsMatrices[result.VamStepsMatrices.length - 1].ResultFunction;
+        if (result.VamStepsMatrices.length > 0) {
             this.resultStepsTitle.nativeElement.innerHTML = "Steps:";
-            for (var _b = 0, _c = result.matrices; _b < _c.length; _b++) {
+            for (var _b = 0, _c = result.VamStepsMatrices; _b < _c.length; _b++) {
                 var resultMatrix = _c[_b];
                 var factory = this.componentFactoryResolver.resolveComponentFactory(ResultMatrix_component_js_1.ResultMatrixComponent);
                 var component = this.target.createComponent(factory);
@@ -117,9 +137,10 @@ __decorate([
 MatrixComponent = __decorate([
     core_1.Component({
         selector: "matrix",
-        template: "\n\n\n        <div #matrix class=\"matrix\">\n\n            <div class=\"column\" >\n                <p *ngFor=\"let s of rows\" class=\"{{s.Class}}\"  >{{s.value}}</p>\n            </div>\n\n            <div class=\"column\" *ngFor=\"let col of columns\">\n                <p class=\"mhead text-center\">{{col.Value}}</p>\n                <cell *ngFor=\"let row of cells\" #cell row=\"{{row.id}}\" col=\"{{col.id}}\"  class=\"{{row.Class}} {{col.Class}}\" ></cell>\n            </div>\n        </div>\n\n        <button (click)=\"calculate()\" class=\"btn btn-primary btn-lg btn-block col-md-12\">Calculate</button>\n        <button (click)=\"reset()\" class=\"btn btn-default btn-lg btn-block col-md-12\">Reset</button>\n\n        <p #resultTitle class=\"title\" ></p>\n        <p #result></p>\n        <p #resultStepsTitle class=\"title\"></p>\n\n"
+        template: "\n        <div #matrix class=\"matrix\">\n            <div class=\"matrix\">\n            <div class=\"column\" >\n                <p *ngFor=\"let s of rows\" class=\"{{s.Class}}\"  >{{s.value}}</p>\n            </div>\n\n            <div class=\"column\" *ngFor=\"let col of columns\">\n                <p class=\"mhead text-center\">{{col.Value}}</p>\n                <cell *ngFor=\"let row of cells\" #cell row=\"{{row.id}}\" col=\"{{col.id}}\"  class=\"{{row.Class}} {{col.Class}}\" ></cell>\n            </div>\n            </div>\n            <button (click)=\"calculate()\" class=\"btn btn-primary btn-block btn-lg\">Izra\u010Dunaj</button>\n            <button (click)=\"setCellsValueToRandom()\" class=\"btn btn-info btn-block btn-lg\">Nasumi\u010Dni brojevi</button>\n            <button (click)=\"reset()\" class=\"btn btn-default btn-block btn-lg\">Resetiraj</button>\n        </div>\n\n        <p #resultTitle class=\"title\" style=\"max-width: 600px;display: block; word-wrap: break-word;\"></p>\n        <p #result></p>\n        <p #resultStepsTitle class=\"title\"></p>\n\n"
     }),
-    __metadata("design:paramtypes", [MatrixService_js_1.MatrixService, core_1.ViewContainerRef,
+    __metadata("design:paramtypes", [MatrixService_js_1.MatrixService,
+        core_1.ViewContainerRef,
         core_1.ComponentFactoryResolver])
 ], MatrixComponent);
 exports.MatrixComponent = MatrixComponent;

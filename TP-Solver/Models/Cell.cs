@@ -1,13 +1,15 @@
 ﻿namespace TP_Solver.Models
 {
-    public sealed class Cell
+    public sealed class Cell : ICell
     {
         public Cell()
         {
-            Allocated = CellState.NotAllocated;
+            State = State.NotAllocated;
         }
 
-        public double Value { get; set; }
-        public double Allocated { get; set; }
+        public int Value { get; set; }
+        public int Allocated { get; set; }
+        public State State { get; set; }
+
     }
 }

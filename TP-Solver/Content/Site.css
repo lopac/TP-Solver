@@ -160,7 +160,14 @@ cell > .form-group input {
     color: cornflowerblue;
 }
 
-.result-cell.crossed { background: #dcdcdc !important; }
+.result-cell.relative-allocated {
+    background: #eee !important;
+    color: crimson !important;
+}
+
+.result-cell.crossed {
+    background: #dcdcdc !important;
+}
 
 .result-cell.supply, .result-cell.demand {
     background: #777 !important;

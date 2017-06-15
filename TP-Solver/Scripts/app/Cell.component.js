@@ -16,7 +16,7 @@ var CellComponent = (function () {
         this.element = element;
     }
     Object.defineProperty(CellComponent.prototype, "value", {
-        get: function () { return $(this.element.nativeElement).find("input").val(); },
+        get: function () { return Number($(this.element.nativeElement).find("input").val()); },
         set: function (value) {
             $(this.element.nativeElement).find("input").val(value);
         },

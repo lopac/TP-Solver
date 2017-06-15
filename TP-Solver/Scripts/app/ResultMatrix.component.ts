@@ -1,5 +1,6 @@
 ﻿import { Component, ViewContainerRef, ComponentFactoryResolver, ViewChild, ElementRef } from "@angular/core";
-import { ResultMatrix } from "./ResultMatrix.js";
+import { Matrix } from "./Matrix.js";
+import { State } from "./Cell.js";
 
 
 @Component({
@@ -10,22 +11,28 @@ import { ResultMatrix } from "./ResultMatrix.js";
         </div>
         `
 })
-export class ResultMatrixComponent {
+export class ResultMatrixComponent
+{
+    private readonly componentFactoryResolver: ComponentFactoryResolver;
+    private readonly viewContainerRef: ViewContainerRef;
 
     @ViewChild("matrix")
     private matrixContainer: ElementRef;
 
-    constructor(private viewContainerRef: ViewContainerRef,
-        private componentFactoryResolver: ComponentFactoryResolver) {
-
-
+    constructor(viewContainerRef: ViewContainerRef,
+        componentFactoryResolver: ComponentFactoryResolver)
+    {
+        this.componentFactoryResolver = componentFactoryResolver;
+        this.viewContainerRef = viewContainerRef;
     }
 
-    public setResultMatrix(value: ResultMatrix) {
+    public setResultMatrix(value: Matrix)
+    {
 
         let header = `<div class="result-header">`;
 
-        for (let i = 0; i < value.Columns; i++) {
+        for (let i = 0; i < value.Columns; i++)
+        {
             header += `<p class="mhead pull-left">D ${i + 1}</p>`;
         }
 
@@ -34,25 +41,36 @@ export class ResultMatrixComponent {
 
         this.matrixContainer.nativeElement.innerHTML += `${header}</div>`;
 
-        for (var i = 0; i < value.Rows; i++) {
+        for (let i = 0; i < value.Rows; i++)
+        {
             let row = `<div class="result-row">`;
 
-            if (i + 1 < 10) {
+            if (i + 1 < 10)
+            {
                 row += `<p class="mhead pull-left">S ${i + 1}</p>`;
-            } else {
+            } else
+            {
                 row += `<p class="mhead pull-left" style="margin-right: 5px;">S${i + 1}</p>`;
             }
 
 
-            for (var j = 0; j < value.Columns; j++) {
-                if (value.Matrix[i][j].Allocated == -1) {
-                    row += `<div class="result-cell pull-left"><span>${value.Matrix[i][j].Value}</span></div>`;
+            for (let j = 0; j < value.Columns; j++)
+            {
+                if (value.Array[i][j].State === State.NotAllocated)
+                {
+                    row += `<div class="result-cell pull-left"><span>${value.Array[i][j].Value}</span></div>`;
 
-                } else if (value.Matrix[i][j].Allocated == 0) {
-                    row += `<div class="result-cell pull-left crossed"><span>${value.Matrix[i][j].Value}</span></div>`;
-                } else {
-                    row += `<div class="result-cell pull-left allocated"><span>${value.Matrix[i][j].Allocated
-                        }</span><strong> / </strong><span>${value.Matrix[i][j].Value}</span></div>`;
+                } else if (value.Array[i][j].State === State.Processed)
+                {
+                    row += `<div class="result-cell pull-left crossed"><span>${value.Array[i][j].Value}</span></div>`;
+                } else if (value.Array[i][j].State === State.Allocated)
+                {
+                    row += `<div class="result-cell pull-left allocated"><span>${value.Array[i][j].Allocated
+                        }</span><strong> / </strong><span>${value.Array[i][j].Value}</span></div>`;
+                } else
+                {
+                    row += `<div class="result-cell pull-left relative-allocated"><span>${value.Array[i][j].Allocated
+                        }</span><strong> / </strong><span>${value.Array[i][j].Value}</span></div>`;
                 }
 
             }
@@ -66,7 +84,8 @@ export class ResultMatrixComponent {
         let demandsRow = `<div class="result-row">`;
         demandsRow += `<p class="mhead pull-left">D </p>`;
 
-        for (let i = 0; i < value.Columns; i++) {
+        for (let i = 0; i < value.Columns; i++)
+        {
             demandsRow += `<div class="result-cell pull-left demand"><span>${value.Demands[i]}<span></div>`;
         }
 
@@ -78,16 +97,17 @@ export class ResultMatrixComponent {
         let maxWidth = 0;
 
 
-        $(this.matrixContainer.nativeElement).find(".result-cell").toArray().forEach(e => {
-            let width = Number($(e).css("width").split("px")[0]);
-            if (width > maxWidth) {
+        $(this.matrixContainer.nativeElement).find(".result-cell").toArray().forEach(e =>
+        {
+            const width = Number($(e).css("width").split("px")[0]);
+            if (width > maxWidth)
+            {
                 maxWidth = width;
             }
-
         });
 
-        $(this.matrixContainer.nativeElement).find(".result-cell").toArray().forEach(e => $(e).css("min-width",maxWidth));
-        $(this.matrixContainer.nativeElement).find(".result-header .mhead").toArray().forEach(e => $(e).css("width",maxWidth));
+        $(".result-matrix").find(".result-cell").toArray().forEach(e => $(e).css("min-width", maxWidth));
+        $(".result-matrix").find(".result-header .mhead").toArray().forEach(e => $(e).css("width", maxWidth));
 
     }
 }
