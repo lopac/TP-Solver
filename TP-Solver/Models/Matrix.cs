@@ -44,19 +44,17 @@ namespace TP_Solver.Models
         {
             get
             {
-                CalculateUandV();
-
-
+                this.CalculateUandV();
                 return _u.Select(x => x ?? 0).ToArray();
             }
         }
+
 
         public int[] V
         {
             get
             {
-                CalculateUandV();
-
+                this.CalculateUandV();
                 return _v.Select(x => x ?? 0).ToArray();
             }
         }
@@ -166,42 +164,68 @@ namespace TP_Solver.Models
 
         private void CalculateUandV()
         {
-            _u = new int?[Rows];
-            _v = new int?[Columns];
 
+            var tryCount = 0;
 
-            //Cij = ui + vj;
-
-            //vj = Cij - ui;
-            //ui = Cij - vj;
-
-            _u[0] = 0;
-
-            var count = 0;
-
-            while ((_u.ToList().Any(x => x == null) || _v.ToList().Any(x => x == null)) && count < 200)
+            do
             {
-                for (var i = 0; i < Rows; i++)
-                {
-                    for (var j = 0; j < Columns; j++)
-                    {
-                        if (this[i, j].State == State.Allocated)
-                        {
-                            if (_v[j] == null && _u[i] != null)
-                            {
-                                _v[j] = this[i, j].Value - _u[i];
-                            }
+                _u = new int?[Rows];
+                _v = new int?[Columns];
 
-                            if (_u[i] == null && _v[j] != null)
+                //sidro rekurzije
+
+                //Cij = ui + vj;
+
+                //vj = Cij - ui;
+                //ui = Cij - vj;
+
+                _u[0] = 0;
+
+                var count = 0;
+
+                while ((_u.ToList().Any(x => x == null) || _v.ToList().Any(x => x == null)) && count < 200)
+                {
+                    for (var i = 0; i < Rows; i++)
+                    {
+                        for (var j = 0; j < Columns; j++)
+                        {
+                            if (this[i, j].State == State.Allocated)
                             {
-                                _u[i] = this[i, j].Value - _v[j];
+                                if (_v[j] == null && _u[i] != null)
+                                {
+                                    _v[j] = this[i, j].Value - _u[i];
+                                }
+
+                                if (_u[i] == null && _v[j] != null)
+                                {
+                                    _u[i] = this[i, j].Value - _v[j];
+                                }
                             }
+                        }
+                    }
+
+                    count++;
+                }
+
+                if (_u.Any(x => x == null) && _v.Any(x => x == null))
+                {
+
+                    var column = _v.ToList().IndexOf(_v.FirstOrDefault(v => v == null));
+
+                    for (int i = 0; i < this.Rows; i++)
+                    {
+                        var cell = Array[i, column];
+                        if (cell.State == State.Processed)
+                        {
+                            cell.State = State.Allocated;
+                            cell.Allocated = 0;
+                            break;
                         }
                     }
                 }
 
-                count++;
-            }
+
+            } while ((_u.Any(x => x == null) && _v.Any(x => x == null)) && ++tryCount < 200);
         }
 
         public IEnumerable<ICell> Flatten()
@@ -222,7 +246,7 @@ namespace TP_Solver.Models
                 for (var j = 0; j < Columns; ++j)
                 {
                     if (this[i, j].Equals(cell))
-                        return new Coordinate { Row = i, Column = j };
+                        return new Coordinate {Row = i, Column = j};
                 }
             }
 

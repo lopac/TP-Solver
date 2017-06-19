@@ -113,7 +113,7 @@ var MatrixComponent = (function () {
                 var component_2 = this.target.createComponent(factory_2);
                 this.resultMatrices.push(component_2);
                 if (resultMatrix == result.ModiStepsMatrices[result.ModiStepsMatrices.length - 1]) {
-                    component_2.instance.setModiResultMatrix(resultMatrix, true);
+                    component_2.instance.setModiResultMatrix(resultMatrix, true, result.ModiStepsMatrices.length === 1);
                 }
                 else {
                     component_2.instance.setModiResultMatrix(resultMatrix, false, isFirst);

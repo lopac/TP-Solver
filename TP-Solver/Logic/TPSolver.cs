@@ -209,10 +209,10 @@ namespace TP_Solver.Helpers
             //ako je m + n - 1 != broj alociranih onda popravi matricu
             if (matrix.Rows + matrix.Columns - 1 != matrix.Flatten().Count(x => x.State == State.Allocated))
             {
-                matrix.RemoveDegeneracy();
+                //matrix.RemoveDegeneracy();
             }
 
-            solutionMatrices.Add(matrix.GetCopy());
+            //solutionMatrices.Add(matrix.GetCopy());
 
             matrix.ComputeRelativeCosts();
 
@@ -223,9 +223,9 @@ namespace TP_Solver.Helpers
             {
                 if (((matrix.Rows + matrix.Columns) - 1) != matrix.Flatten().Count(x => x.State == State.Allocated))
                 {
-                    matrix.RemoveDegeneracy();
+                    //matrix.RemoveDegeneracy();
 
-                    solutionMatrices.Add(matrix.GetCopy());
+                    //solutionMatrices.Add(matrix.GetCopy());
 
                 }
 
@@ -236,9 +236,9 @@ namespace TP_Solver.Helpers
 
                 if (((matrix.Rows + matrix.Columns) - 1) != matrix.Flatten().Count(x => x.State == State.Allocated))
                 {
-                    matrix.RemoveDegeneracy();
+                    //matrix.RemoveDegeneracy();
 
-                    solutionMatrices.Add(matrix.GetCopy());
+                    //solutionMatrices.Add(matrix.GetCopy());
 
                 }
 
@@ -346,6 +346,8 @@ namespace TP_Solver.Helpers
         {
             var u = matrix.U;
             var v = matrix.V;
+
+
 
             //resetiraj prijašnje relativne alokacije
             matrix.Flatten().Where(x => x.State == State.RelativeAllocated).ForEach(x => x.State = State.Processed);

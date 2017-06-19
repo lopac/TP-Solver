@@ -212,7 +212,7 @@ export class MatrixComponent
                 this.resultMatrices.push(component);
                 if (resultMatrix == result.ModiStepsMatrices[result.ModiStepsMatrices.length - 1])
                 {
-                    component.instance.setModiResultMatrix(resultMatrix, true);
+                    component.instance.setModiResultMatrix(resultMatrix, true, result.ModiStepsMatrices.length === 1);
                 } else
                 {
                     component.instance.setModiResultMatrix(resultMatrix, false, isFirst);
