@@ -3,7 +3,7 @@
 
 <html>
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>@ViewBag.Title</title>
 
     @Styles.Render("~/Content/css")
@@ -17,11 +17,11 @@
     <script src="https://unpkg.com/systemjs@0.19.39/dist/system.src.js"></script>
     <script src="/Scripts/systemjs.config.js"></script>
     <script>
-        System.import('/Scripts/main.js').catch(function(err){ console.error(err); });
+        System.import('/Scripts/main.js').catch(function(err) { console.error(err); });
     </script>
 </head>
 <body>
-<nav class="navbar navbar-inverse">
+<nav class="navbar navbar-inverse" style="border-radius: 0 !important;">
     <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-2">
@@ -32,7 +32,9 @@
             </button>
 
             <a class="navbar-brand brand-text" href="@Url.Action("Index", "Home")">
-                <span style="float: left; margin-top: -5px;"><img src="/Content/Images/logo.png" width="32" /></span>
+                <span style="float: left; margin-top: -5px;">
+                    <img src="/Content/Images/logo.png" width="32"/>
+                </span>
                 &nbsp;TPSolver
                 <span style="clear: both"></span>
             </a>
@@ -40,13 +42,10 @@
         </div>
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
-            <ul class="nav navbar-nav">
-                <li class="active"><a href="@Url.Action("Index", "Home")">Home</a></li>
-                <li class="active"><a href="@Url.Action("Index", "Home")">Calculator</a></li>
-            </ul>
-
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="//github.com/lopac">© Antonio Lopac</a></li>
+                <li>
+                    <a href="//github.com/lopac">© Antonio Lopac</a>
+                </li>
             </ul>
         </div>
     </div>

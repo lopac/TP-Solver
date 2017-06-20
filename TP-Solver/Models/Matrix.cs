@@ -1,80 +1,305 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
 using TP_Solver.Helpers;
+using TP_Solver.Interfaces;
 
 namespace TP_Solver.Models
 {
     public class Matrix
     {
-        private readonly Cell[,] _array;
-
+        private int?[] _u;
+        private int?[] _v;
 
         public Matrix(int rows, int columns)
         {
-            _array = new Cell[rows, columns];
+            Array = new ICell[rows, columns];
 
-            Supplies = new double[rows];
+            Supplies = new int[rows];
 
-            Demands = new double[columns];
+            Demands = new int[columns];
 
-            for (var row = 0; row < _array.GetLength(0); row++)
+            for (var row = 0; row < Rows; row++)
             {
-                for (var column = 0; column < _array.GetLength(1); column++)
+                for (var column = 0; column < Columns; column++)
                 {
-                    _array[row, column] = new Cell();
+                    this[row, column] = new Cell();
                 }
             }
         }
 
+        public ICell[,] Array { get; }
 
-        public Cell this[int i, int j]
+        public int Rows
         {
-            get { return _array[i, j]; }
-            set { _array[i, j] = value; }
+            get { return Array.GetLength(0); }
+        }
+
+        public int Columns
+        {
+            get { return Array.GetLength(1); }
+        }
+
+        public int[] U
+        {
+            get
+            {
+                this.CalculateUandV();
+                return _u.Select(x => x ?? 0).ToArray();
+            }
         }
 
 
-        public double[] Supplies { get; set; }
-
-        public double[] Demands { get; set; }
-
-        public IEnumerable<Cell> Flatten()
+        public int[] V
         {
-            for (var row = 0; row < _array.GetLength(0); row++)
+            get
             {
-                for (var column = 0; column < _array.GetLength(1); column++)
+                this.CalculateUandV();
+                return _v.Select(x => x ?? 0).ToArray();
+            }
+        }
+
+        [JsonIgnore]
+        public IEnumerable<Penalty> ColumnDifferences
+        {
+            get
+            {
+                for (var i = 0; i < Rows; i++)
                 {
-                    yield return _array[row, column];
+                    var row = new List<ICell>();
+
+                    for (var j = 0; j < Columns; j++)
+                    {
+                        row.Add(Array[i, j]);
+                    }
+
+                    row = row.Where(x => x.State == State.NotAllocated).OrderBy(x => x.Value).ToList();
+
+                    if (row.Count > 1)
+                    {
+                        yield return new Penalty
+                        {
+                            Id = i,
+                            Value = (row[1].Value - row[0].Value)
+                        };
+                    }
+                    else
+                    {
+                        yield return null;
+                    }
                 }
             }
         }
 
-        public int GetLength(int id)
+        [JsonIgnore]
+        public IEnumerable<Penalty> RowDifferences
         {
-            return _array.GetLength(id);
+            get
+            {
+                for (var j = 0; j < Columns; j++)
+                {
+                    var column = new List<ICell>();
+
+                    for (var i = 0; i < Rows; i++)
+                    {
+                        column.Add(Array[i, j]);
+                    }
+
+                    column = column.Where(x => x.State == State.NotAllocated).OrderBy(x => x.Value).ToList();
+
+                    if (column.Count > 1)
+                    {
+                        yield return new Penalty
+                        {
+                            Id = j,
+                            Value = (column[1].Value - column[0].Value)
+                        };
+                    }
+                    else
+                    {
+                        yield return null;
+                    }
+                }
+            }
+        }
+
+        public ICell this[int i, int j]
+        {
+            get { return Array[i, j]; }
+            set { Array[i, j] = value; }
+        }
+
+
+        public int[] Supplies { get; set; }
+
+        public int[] Demands { get; set; }
+
+        public string ResultFunction
+        {
+            get
+            {
+                var result = 0;
+                var resultFunction = string.Empty;
+                for (var i = 0; i < Rows; i++)
+                {
+                    for (var j = 0; j < Columns; j++)
+                    {
+                        if (this[i, j].State == State.Allocated)
+                        {
+                            resultFunction += $"({this[i, j].Allocated} * {this[i, j].Value})";
+                            resultFunction += $" + ";
+                            result += this[i, j].Allocated * this[i, j].Value;
+                        }
+                    }
+                }
+
+
+                resultFunction = resultFunction.ReplaceLastOccurrence(" + ", string.Empty);
+
+                resultFunction += $" = {result}";
+
+                return resultFunction;
+            }
+        }
+
+        private void CalculateUandV()
+        {
+
+            var tryCount = 0;
+
+            do
+            {
+                _u = new int?[Rows];
+                _v = new int?[Columns];
+
+                //sidro rekurzije
+
+                //Cij = ui + vj;
+
+                //vj = Cij - ui;
+                //ui = Cij - vj;
+
+                _u[0] = 0;
+
+                var count = 0;
+
+                while ((_u.ToList().Any(x => x == null) || _v.ToList().Any(x => x == null)) && count < 200)
+                {
+                    for (var i = 0; i < Rows; i++)
+                    {
+                        for (var j = 0; j < Columns; j++)
+                        {
+                            if (this[i, j].State == State.Allocated)
+                            {
+                                if (_v[j] == null && _u[i] != null)
+                                {
+                                    _v[j] = this[i, j].Value - _u[i];
+                                }
+
+                                if (_u[i] == null && _v[j] != null)
+                                {
+                                    _u[i] = this[i, j].Value - _v[j];
+                                }
+                            }
+                        }
+                    }
+
+                    count++;
+                }
+
+                if (_u.Any(x => x == null) && _v.Any(x => x == null))
+                {
+
+                    var column = _v.ToList().IndexOf(_v.FirstOrDefault(v => v == null));
+
+                    for (int i = 0; i < this.Rows; i++)
+                    {
+                        var cell = Array[i, column];
+                        if (cell.State == State.Processed)
+                        {
+                            cell.State = State.Allocated;
+                            cell.Allocated = 0;
+                            break;
+                        }
+                    }
+                }
+
+
+            } while ((_u.Any(x => x == null) && _v.Any(x => x == null)) && ++tryCount < 200);
+        }
+
+        public IEnumerable<ICell> Flatten()
+        {
+            for (var row = 0; row < Rows; row++)
+            {
+                for (var column = 0; column < Columns; column++)
+                {
+                    yield return this[row, column];
+                }
+            }
+        }
+
+        public ICoordinate CoordinatesOf(ICell cell)
+        {
+            for (var i = 0; i < Rows; ++i)
+            {
+                for (var j = 0; j < Columns; ++j)
+                {
+                    if (this[i, j].Equals(cell))
+                        return new Coordinate {Row = i, Column = j};
+                }
+            }
+
+            return new Coordinate {Row = -1, Column = -1};
         }
 
         private void AllocateRow(int row, int column)
         {
-            for (var j = column + 1; j < _array.GetLength(0); j++)
+            for (var j = 0; j < Columns; j++)
             {
-                _array[row, j].Allocated = CellState.Allocated;
+                if (this[row, j].State == State.NotAllocated)
+                {
+                    this[row, j].State = State.Processed;
+                }
             }
         }
 
         private void AllocateColumn(int row, int column)
         {
-            for (var i = row + 1; i < _array.GetLength(0); i++)
+            for (var i = 0; i < Rows; i++)
             {
-                _array[i, column].Allocated = CellState.Allocated;
+                if (this[i, column].State == State.NotAllocated)
+                {
+                    this[i, column].State = State.Processed;
+                }
             }
+        }
+
+        public int GetCellAllocation(int row, int column)
+        {
+            int allocation;
+
+            if (Supplies[row].CompareTo(Demands[column]) < 0)
+            {
+                allocation = Demands[column] - Supplies[row];
+            }
+            else if (Supplies[row].CompareTo(Demands[column]) > 0)
+            {
+                allocation = Supplies[row] - Demands[column];
+            }
+            else // if equal
+            {
+                allocation = Supplies[row];
+            }
+
+            return allocation;
         }
 
         public void Allocate(int row, int column)
         {
             if (Supplies[row].CompareTo(Demands[column]) < 0)
             {
-                _array[row, column].Allocated = Supplies[row];
+                this[row, column].Allocated = Supplies[row];
                 Demands[column] -= Supplies[row];
                 Supplies[row] = 0;
 
@@ -82,7 +307,7 @@ namespace TP_Solver.Models
             }
             else if (Supplies[row].CompareTo(Demands[column]) > 0)
             {
-                _array[row, column].Allocated = Demands[column];
+                this[row, column].Allocated = Demands[column];
 
                 Supplies[row] -= Demands[column];
                 Demands[column] = 0;
@@ -91,7 +316,7 @@ namespace TP_Solver.Models
             }
             else // if equal
             {
-                _array[row, column].Allocated = Supplies[row];
+                this[row, column].Allocated = Supplies[row];
 
                 Supplies[row] = 0;
                 Demands[column] = 0;
@@ -99,69 +324,38 @@ namespace TP_Solver.Models
                 AllocateRow(row, column);
                 AllocateColumn(row, column);
             }
+
+            this[row, column].State = State.Allocated;
         }
 
         public Matrix GetCopy()
         {
-            var rows = this.GetLength(0);
-            var cols = this.GetLength(1);
+            var matrix = new Matrix(Rows, Columns);
 
-            var matrix = new Matrix(rows, cols)
+            for (var i = 0; i < Demands.Length; i++)
             {
-            };
-
-            for (var i = 0; i < this.Demands.Length; i++)
-            {
-                matrix.Demands[i] = this.Demands[i];
+                matrix.Demands[i] = Demands[i];
             }
 
-            for (var i = 0; i < this.Supplies.Length; i++)
+            for (var i = 0; i < Supplies.Length; i++)
             {
-                matrix.Supplies[i] = this.Supplies[i];
+                matrix.Supplies[i] = Supplies[i];
             }
 
-            for (int i = 0; i < rows; i++)
+            for (var i = 0; i < Rows; i++)
             {
-                for (int j = 0; j < cols; j++)
+                for (var j = 0; j < Columns; j++)
                 {
                     matrix[i, j] = new Cell
                     {
                         Value = this[i, j].Value,
-                        Allocated = this[i, j].Allocated
+                        Allocated = this[i, j].Allocated,
+                        State = this[i, j].State
                     };
                 }
             }
 
             return matrix;
-        }
-
-        public string ResultFunction
-        {
-            get
-            {
-                double result = 0;
-                var resultFunction = string.Empty;
-                for (int i = 0; i < this.GetLength(0); i++)
-                {
-                    for (int j = 0; j < this.GetLength(1); j++)
-                    {
-                        if (this[i, j].Allocated > 0)
-                        {
-                            resultFunction += $"({this[i, j].Allocated} * {this[i, j].Value})";
-                            resultFunction += $" + ";
-
-                            result += this[i, j].Allocated * this[i, j].Value;
-                        }
-                    }
-                }
-
-
-                resultFunction = resultFunction.ReplaceLastOccurrence(" + ", String.Empty);
-
-                resultFunction += $" = {result}";
-
-                return resultFunction;
-            }
         }
     }
 }

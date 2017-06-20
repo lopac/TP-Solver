@@ -9,9 +9,15 @@ import { MatrixSize } from "./MatrixService.js";
 @Component({
     selector: 'container',
     template: `
-
+        <h5 class="text-center">Izradio <strong>Antonio Lopac</strong>, FOI 3. godina Informacijski sustavi</h5>
+        <h5 class="text-left">Opis rada algoritma</h5>
+        <p class="lead text-justify" style="max-width: 400px; margin: auto auto; word-break: normal;">
+            Nakon zahtjeva korisnika za izračunom pokreće se algoritam. Odluka o metodi za početni raspored tereta određuje se prema manjoj kompleksnosti.
+            Implementirane metode su: <strong>Metoda sjeverozapadnog kuta</strong>,
+            <strong>Metoda relativnih troškova</strong> te <strong>Vogelova aproksimativna metoda</strong>. Za optimizaciju početnog rasporeda tereta koristi se <strong>MODI metoda</strong>.</p>
+        <hr/>
         <div class="buttons row text-center" style="margin: 0;">
-            <p class="lead col-md-3 col-md-offset-2 col-sm-4 col-sm-offset-2 col-xs-4 col-xs-offset-2 text-center">Rows</p>
+            <p class="lead col-md-3 col-md-offset-2 col-sm-4 col-sm-offset-2 col-xs-4 col-xs-offset-2 text-center">Ishodišta</p>
 
             <button class="btn btn-default col-md-2 col-sm-2 col-xs-2" (click)="decrementRows()"><span class="glyphicon glyphicon-minus"></span></button>
             <p class="col-md-1 col-sm-1 col-xs-1">{{rows - 1}}</p>
@@ -19,7 +25,7 @@ import { MatrixSize } from "./MatrixService.js";
         </div>
 
         <div class="buttons row text-center" style="margin: 0;">
-            <p class="lead col-md-3 col-md-offset-2  col-sm-4  col-sm-offset-2 col-xs-4  col-xs-offset-2 text-center">Columns</p>
+            <p class="lead col-md-3 col-md-offset-2  col-sm-4  col-sm-offset-2 col-xs-4  col-xs-offset-2 text-center">Odredišta</p>
 
             <button class="btn btn-default col-md-2  col-sm-2 col-xs-2" (click)="decrementCols()"><span class="glyphicon glyphicon-minus"></span></button>
             <p class="col-md-1 col-sm-1 col-xs-1">{{columns - 1}}</p>

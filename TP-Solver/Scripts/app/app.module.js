@@ -7,10 +7,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var core_1 = require("@angular/core");
 var platform_browser_1 = require("@angular/platform-browser");
-var App_component_js_1 = require("./App.component.js");
 var Container_component_js_1 = require("./Container.component.js");
 var Cell_component_js_1 = require("./Cell.component.js");
 var Matrix_component_js_1 = require("./Matrix.component.js");
+var ResultMatrix_component_js_1 = require("./ResultMatrix.component.js");
 var MatrixService_js_1 = require("./MatrixService.js");
 var AppModule = (function () {
     function AppModule() {
@@ -20,8 +20,8 @@ var AppModule = (function () {
 AppModule = __decorate([
     core_1.NgModule({
         imports: [platform_browser_1.BrowserModule],
-        declarations: [App_component_js_1.AppComponent, Container_component_js_1.ContainerComponent, Matrix_component_js_1.MatrixComponent, Cell_component_js_1.CellComponent],
-        entryComponents: [Matrix_component_js_1.MatrixComponent],
+        declarations: [Container_component_js_1.ContainerComponent, Matrix_component_js_1.MatrixComponent, Cell_component_js_1.CellComponent, ResultMatrix_component_js_1.ResultMatrixComponent],
+        entryComponents: [Matrix_component_js_1.MatrixComponent, ResultMatrix_component_js_1.ResultMatrixComponent],
         providers: [MatrixService_js_1.MatrixService],
         exports: [Container_component_js_1.ContainerComponent],
         bootstrap: [Container_component_js_1.ContainerComponent]

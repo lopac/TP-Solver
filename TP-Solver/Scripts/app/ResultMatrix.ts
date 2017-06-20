@@ -2,19 +2,17 @@
 
 
 export class ResultMatrix {
-    columns: number;
-    rows: number;
-    demands: Array<number>;
-    supplies: Array<number>;
-    matrix: Array<Array<Cell>>;
-    resultFunction: string;
+    Columns: number;
+    Rows: number;
+    Demands: Array<number>;
+    Supplies: Array<number>;
+    Matrix: Array<Array<Cell>>;
 
     constructor(columns: number, rows: number, demands: number[], supplies: number[], matrix: number[][], resultFunction: string) {
-        this.columns = 0;
-        this.rows = 0;
-        this.demands = [];
-        this.supplies = [];
-        this.matrix = [];
-        this.resultFunction = "";
+        this.Columns = 0;
+        this.Rows = 0;
+        this.Demands = [];
+        this.Supplies = [];
+        this.Matrix = [];
     }
 }

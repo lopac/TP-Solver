@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Web.Mvc;
-using TP_Solver.Helpers;
-using TP_Solver.Models;
+﻿using System.Web.Mvc;
 
 namespace TP_Solver.Controllers
 {
